@@ -1,0 +1,3 @@
+#ECONOMIA DE ENERGIA 
+
+A ideia dessa atividade era buscar meios para economizar o uso de energia do microcontrolador, para isso foi preciso utilizar o SLEEP que permite que o microcontrolador "durma" parando o funcionamento de todos os registradores que não estão sendo utilizados, mas o dispositivo não acorda automaticamente e uma das formas que utilizei para acordá-lo foi promovendo o estouro do WATCHDOG, após isso medi as tensões para saber qual led deve ser aceso, dependendo do intervalo em que a tensão de entrada se encontra
