@@ -1,0 +1,521 @@
+MPASM 5.77                    COMPARADOR.ASM   11-17-2021  11:28:49         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00002 ;*              MODIFICAÇÕES PARA USO COM 12F675                   *
+                      00003 ;*                FEITAS PELO PROF. MARDSON                        *
+                      00004 ;*                      MARÇO DE 2021                              *
+                      00005 ;*                 BASEADO NO EXEMPLO DO LIVRO                     *
+                      00006 ;*           Desbravando o PIC. David José de Souza                *
+                      00007 ;*-----------------------------------------------------------------*
+                      00008 ;*   MODELO PARA O PIC 12F675                                      *
+                      00009 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00010 
+                      00011 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00012 ;*                     ARQUIVOS DE DEFINIÇÕES                      *
+                      00013 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00014 #INCLUDE <p12f675.inc>  ;ARQUIVO PADRÃO MICROCHIP PARA 12F675
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Nov 22 2017
+                      00005 ;  MPASM PIC12F675 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00367         LIST
+                      00015 
+2007   3FA4           00016         __CONFIG _BODEN_OFF & _CP_OFF & _PWRTE_ON & _WDT_OFF & _MCLRE_ON & _INTRC_OSC_NOCLKOUT
+                      00017 
+                      00018 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00019 ;*                    PAGINAÇÃO DE MEMÓRIA                         *
+                      00020 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00021 ;DEFINIÇÃO DE COMANDOS DE USUÁRIO PARA ALTERAÇÃO DA PÁGINA DE MEMÓRIA
+                      00022 #DEFINE BANK0   BCF STATUS,RP0  ;SETA BANK 0 DE MEMÓRIA
+                      00023 #DEFINE BANK1   BSF STATUS,RP0  ;SETA BANK 1 DE MAMÓRIA
+                      00024 
+                      00025 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00026 ;*                         VARIÁVEIS                               *
+                      00027 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00028 ; DEFINIÇÃO DOS NOMES E ENDEREÇOS DE TODAS AS VARIÁVEIS UTILIZADAS 
+                      00029 ; PELO SISTEMA
+                      00030 
+                      00031         CBLOCK  0x20    ;ENDEREÇO INICIAL DA MEMÓRIA DE
+                      00032                                         ;USUÁRIO
+  00000020            00033                 W_TEMP            ;REGISTRADORES TEMPORÁRIOS PARA USO
+  00000021            00034                 STATUS_TEMP       ;JUNTO ÀS INTERRUPÇÕE
+  00000022            00035                 INTERRUPTOR
+  00000023            00036                 CONTADOR
+  00000024            00037                 PERIODO
+  00000025            00038                 VALORDIGITAL
+                      00039                 ;COLOQUE AQUI SUAS NOVAS VARIÁVEIS
+                      00040                 ;NÃO ESQUEÇA COMENTÁRIOS ESCLARECEDORES
+                      00041 
+                      00042         ENDC                    ;FIM DO BLOCO DE DEFINIÇÃO DE VARIÁVEIS
+                      00043 
+MPASM 5.77                    COMPARADOR.ASM   11-17-2021  11:28:49         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00044 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00045 ;*                        FLAGS INTERNOS                           *
+                      00046 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00047 ; DEFINIÇÃO DE TODOS OS FLAGS UTILIZADOS PELO SISTEMA
+                      00048 
+                      00049 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00050 ;*                         CONSTANTES                              *
+                      00051 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00052 ; DEFINIÇÃO DE TODAS AS CONSTANTES UTILIZADAS PELO SISTEMA
+                      00053 
+                      00054 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00055 ;*                           ENTRADAS                              *
+                      00056 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00057 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO ENTRADA
+                      00058 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00059 
+                      00060 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00061 ;*                           SAÍDAS                                *
+                      00062 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00063 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO SAÍDA
+                      00064 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00065 
+                      00066 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00067 ;*                       VETOR DE RESET                            *
+                      00068 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00069 
+                      00070         ORG     0x00                    ;ENDEREÇO INICIAL DE PROCESSAMENTO
+0000   2???           00071         GOTO    INICIO
+                      00072         
+                      00073         
+                      00074 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00075 ;*                    INÍCIO DA INTERRUPÇÃO                        *
+                      00076 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00077 ; ENDEREÇO DE DESVIO DAS INTERRUPÇÕES. A PRIMEIRA TAREFA É SALVAR OS
+                      00078 ; VALORES DE "W" E "STATUS" PARA RECUPERAÇÃO FUTURA
+                      00079 
+                      00080         ORG     0x04                    ;ENDEREÇO INICIAL DA INTERRUPÇÃO
+0004   00A0           00081         MOVWF   W_TEMP          ;COPIA W PARA W_TEMP
+0005   0E03           00082         SWAPF   STATUS,W
+0006   00A1           00083         MOVWF   STATUS_TEMP     ;COPIA STATUS PARA STATUS_TEMP
+                      00084         
+                      00085 
+                      00086 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00087 ;*                    ROTINA DE INTERRUPÇÃO                        *
+                      00088 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00089 ; AQUI SERÃO ESCRITAS AS ROTINAS DE RECONHECIMENTO E TRATAMENTO DAS
+                      00090 ; INTERRUPÇÕES
+                      00091         ; VERIFICANDO A POSIÇÃO DA INTERRUPÇAÕ
+                      00092 
+                      00093 
+                      00094         
+                      00095 
+                      00096         
+MPASM 5.77                    COMPARADOR.ASM   11-17-2021  11:28:49         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00097 
+                      00098 
+                      00099 
+                      00100         
+                      00101         
+                      00102 
+                      00103 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00104 ;*                 ROTINA DE SAÍDA DA INTERRUPÇÃO                  *
+                      00105 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00106 ; OS VALORES DE "W" E "STATUS" DEVEM SER RECUPERADOS ANTES DE 
+                      00107 ; RETORNAR DA INTERRUPÇÃO
+                      00108 
+0007                  00109 SAI_INT
+0007   0E21           00110         SWAPF   STATUS_TEMP,W
+0008   0083           00111         MOVWF   STATUS          ;MOVE STATUS_TEMP PARA STATUS
+0009   0EA0           00112         SWAPF   W_TEMP,F
+000A   0E20           00113         SWAPF   W_TEMP,W        ;MOVE W_TEMP PARA W
+000B   0009           00114         RETFIE
+                      00115         
+                      00116 
+                      00117 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00118 ;*                       ROTINAS E SUBROTINAS                      *
+                      00119 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00120 ; CADA ROTINA OU SUBROTINA DEVE POSSUIR A DESCRIÇÃO DE FUNCIONAMENTO
+                      00121 ; E UM NOME COERENTE ÀS SUAS FUNÇÕES.
+                      00122 
+                      00123 
+                      00124 
+                      00125         ;CORPO DA ROTINA
+                      00126 ;CONDICAO1
+                      00127 ;       BSF GPIO, GP2           ; SE a temperatura é maior que a tmax, liga o compressor
+                      00128 ;       ;Configurando para Tmin
+                      00129 ;       BANK1
+                      00130 ;       MOVLW   B'10000111'     ;Ajustando a tensão de referência para o low(vrr), escala do valor 7 ref
+                            erente a config do tmin
+                      00131 ;       MOVWF   VRCON
+                      00132 ;       BANK0
+                      00133 ;       GOTO C3
+                      00134 ;CONDICAO2
+                      00135 ;       BCF GPIO, GP2           ; SE a temperatura é menor que a tmIN, desliga o compressor
+                      00136 ;       ;Configurando para Tmax
+                      00137 ;       BANK1
+                      00138 ;       MOVLW   B'10001010'     ;Ajustando a tensão de referência para o high(vrr), escala do valor 10 r
+                            eferente a config do tmax
+                      00139 ;       MOVWF   VRCON
+                      00140 ;       BANK0
+                      00141 ;       GOTO C1
+                      00142 
+                      00143  
+                      00144 
+                      00145 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00146 ;*                     INICIO DO PROGRAMA                          *
+                      00147 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+MPASM 5.77                    COMPARADOR.ASM   11-17-2021  11:28:49         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00148         
+000C                  00149 INICIO
+000C   1683           00150         BANK1                           ;ALTERA PARA O BANCO 1
+000D   3002           00151         MOVLW   B'00000010'     ;CONFIGUREI O GP1 COMO ENTRADA, POIS RECEB O SINAL DE TEMPERATURA, COM e
+                            xceção gp3 que não muda
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000E   0085           00152         MOVWF   TRISIO          ;COMO SAÍDAS
+000F   3002           00153         MOVLW   B'00000010'     ;divisor de clock configurado para dividir por 8 e an3 configurado como 
+                            entrada analógico
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0010   009F           00154         MOVWF   ANSEL           ;DEFINE PORTAS COMO Digital I/O
+0011   3005           00155         MOVLW   B'00000101'     ; 1:64
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0012   0081           00156         MOVWF   OPTION_REG      ;DEFINE OPÇÕES DE OPERAÇÃO
+0013   3000           00157         MOVLW   B'00000000'     ;lIGUEI A INTERRUPÇÃO PARA O ESTOURO 
+0014   008B           00158         MOVWF   INTCON          ;DEFINE OPÇÕES DE INTERRUPÇÕES
+0015   3000           00159         MOVLW   B'00000000'     ;N utilizarei interrupção 
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0016   0096           00160         MOVWF   IOC             ;DEFINE OPÇÕES DE INTERRUPÇÕES
+0017   308A           00161         MOVLW   B'10001010'     ;Ajustando a tensão de referência para o high, escala do valor 10 refere
+                            nte a config do tmax
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0018   0099           00162         MOVWF   VRCON
+0019   1283           00163         BANK0                           ;RETORNA PARA O BANCO
+001A   3005           00164         MOVLW   B'00000101'     ;habilitei o conversor e selecionei o canal analógico 1 referente ao gp1
+001B   009F           00165         MOVWF   ADCON0 
+001C   3004           00166         MOVLW   B'00000100'     ; Configurando o comparador como 100, pois é o modelo que se aplica a at
+                            ividade
+001D   0099           00167         MOVWF   CMCON           ;DEFINE O MODO DE OPERAÇÃO DO COMPARADOR ANALÓGICO
+                      00168 
+                      00169 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00170 ;*                     INICIALIZAÇÃO DAS VARIÁVEIS                 *
+                      00171 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00172 
+                      00173 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00174 ;*                     ROTINA PRINCIPAL                            *
+                      00175 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+001E                  00176 C1
+001E   1B19           00177         BTFSC CMCON, 6          ; COMPARANDO TENSÃO REFERANCIAL COM A ENTRADA, SE A ENTRADA FOR MAIOR, O
+                            UTPUT = 0, SE NÃO OUTPUT = 1
+001F   2???           00178         GOTO C1
+0020   1505           00179         BSF GPIO, GP2           ; SE a temperatura é maior que a tmax, liga o compressor
+                      00180         ;Configurando para Tmin
+0021   1683           00181         BANK1
+0022   30A7           00182         MOVLW   B'10100111'     ;Ajustando a tensão de referência para o low(vrr), escala do valor 7 ref
+                            erente a config do tmin
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0023   0099           00183         MOVWF   VRCON
+0024   1283           00184         BANK0
+0025                  00185 C2
+0025   1F19           00186         BTFSS CMCON, 6
+0026   2???           00187         GOTO C2
+0027   1105           00188         BCF GPIO, GP2
+MPASM 5.77                    COMPARADOR.ASM   11-17-2021  11:28:49         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00189         ;Configurando para Tmin
+0028   1683           00190         BANK1
+0029   308A           00191         MOVLW   B'10001010'     ;Ajustando a tensão de referência para o high(vrr), escala do valor 10 r
+                            eferente a config do tmax
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002A   0099           00192         MOVWF   VRCON
+002B   1283           00193         BANK0
+002C   2???           00194         GOTO C1
+                      00195         
+                      00196         ;BSF GPIO, GP2          ; SE a temperatura é maior que a tmax, liga o compressor
+                      00197         ;Configurando para Tmin
+                      00198         ;MOVLW   B'10000111'    ;Ajustando a tensão de referência para o low(vrr), escala do valor 7 ref
+                            erente a config do tmin
+                      00199         ;MOVWF  VRCON
+                      00200         ;GOTO MAIN
+                      00201 ;2
+                      00202         ;BTFSS CMCON, 6
+                      00203         ;GOTO C2
+                      00204         ;CALL CONDICAO2
+                      00205         ;BSF GPIO, GP2          ; SE a temperatura é menor que a tmIN, desliga o compressor
+                      00206         ;Configurando para Tmax
+                      00207         ;MOVLW   B'10001010'    ;Ajustando a tensão de referência para o high(vrr), escala do valor 10 r
+                            eferente a config do tmax
+                      00208         ;MOVWF  VRCON
+                      00209         ;GOTO CONDICAO2
+                      00210 ;C3
+                      00211         ;GOTO FIM
+                      00212 
+                      00213         
+                      00214         
+                      00215 
+                      00216 
+                      00217 
+                      00218 
+002D                  00219 FIM
+                      00220         
+                      00221 
+                      00222 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00223 ;*                       FIM DO PROGRAMA                           *
+                      00224 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00225 
+3FA4                  00226         END
+MPASM 5.77                    COMPARADOR.ASM   11-17-2021  11:28:49         PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADCON0                            0000001F
+ADCS0                             00000004
+ADCS1                             00000005
+ADCS2                             00000006
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANS0                              00000000
+ANS1                              00000001
+ANS2                              00000002
+ANS3                              00000003
+ANSEL                             0000009F
+BANK0                             BCF STATUS,RP0
+BANK1                             BSF STATUS,RP0
+C                                 00000000
+C1                                0000001E
+C2                                00000025
+CAL0                              00000002
+CAL1                              00000003
+CAL2                              00000004
+CAL3                              00000005
+CAL4                              00000006
+CAL5                              00000007
+CHS0                              00000002
+CHS1                              00000003
+CINV                              00000004
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             00000019
+CMIE                              00000003
+CMIF                              00000003
+CONTADOR                          00000023
+COUT                              00000006
+DC                                00000001
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDAT                             0000009A
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+FIM                               0000002D
+FSR                               00000004
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+MPASM 5.77                    COMPARADOR.ASM   11-17-2021  11:28:49         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GP4                               00000004
+GP5                               00000005
+GPIE                              00000003
+GPIF                              00000000
+GPIO                              00000005
+GPIO0                             00000000
+GPIO1                             00000001
+GPIO2                             00000002
+GPIO3                             00000003
+GPIO4                             00000004
+GPIO5                             00000005
+INDF                              00000000
+INICIO                            0000000C
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTERRUPTOR                       00000022
+INTF                              00000001
+IOC                               00000096
+IOC0                              00000000
+IOC1                              00000001
+IOC2                              00000002
+IOC3                              00000003
+IOC4                              00000004
+IOC5                              00000005
+IOCB                              00000096
+IOCB0                             00000000
+IOCB1                             00000001
+IOCB2                             00000002
+IOCB3                             00000003
+IOCB4                             00000004
+IOCB5                             00000005
+IRP                               00000007
+NOT_BOD                           00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_GPPU                          00000007
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OPTION_REG                        00000081
+OSCCAL                            00000090
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PERIODO                           00000024
+PIE1                              0000008C
+MPASM 5.77                    COMPARADOR.ASM   11-17-2021  11:28:49         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PIR1                              0000000C
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+SAI_INT                           00000007
+STATUS                            00000003
+STATUS_TEMP                       00000021
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1IE                              00000000
+T1IF                              00000000
+T1OSCEN                           00000003
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TRISIO                            00000085
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+TRISIO4                           00000004
+TRISIO5                           00000005
+VALORDIGITAL                      00000025
+VCFG                              00000006
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000099
+VREN                              00000007
+VRR                               00000005
+W                                 00000000
+WPU                               00000095
+WPU0                              00000000
+WPU1                              00000001
+WPU2                              00000002
+MPASM 5.77                    COMPARADOR.ASM   11-17-2021  11:28:49         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+WPU4                              00000004
+WPU5                              00000005
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+W_TEMP                            00000020
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00003F7F
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FOSC_EC                          00003FFB
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRCCLK                    00003FFD
+_FOSC_INTRCIO                     00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FF9
+__12F675                          00000001
+__DEBUG                           
+__MPLAB_DEBUGGER_SIMULATOR        1
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     7 reported,     0 suppressed
+
+
