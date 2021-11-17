@@ -1,0 +1,591 @@
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00002 ;*              MODIFICAÇÕES PARA USO COM 12F675                   *
+                      00003 ;*                FEITAS PELO PROF. MARDSON                        *
+                      00004 ;*                      MARÇO DE 2021                              *
+                      00005 ;*                 BASEADO NO EXEMPLO DO LIVRO                     *
+                      00006 ;*           Desbravando o PIC. David José de Souza                *
+                      00007 ;*-----------------------------------------------------------------*
+                      00008 ;*   MODELO PARA O PIC 12F675                                      *
+                      00009 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00010 
+                      00011 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00012 ;*                     ARQUIVOS DE DEFINIÇÕES                      *
+                      00013 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00014 #INCLUDE <p12f675.inc>  ;ARQUIVO PADRÃO MICROCHIP PARA 12F675
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Nov 22 2017
+                      00005 ;  MPASM PIC12F675 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00367         LIST
+                      00015 
+2007   3FAC           00016         __CONFIG _BODEN_OFF & _CP_OFF & _PWRTE_ON & _WDT_ON & _MCLRE_ON & _INTRC_OSC_NOCLKOUT
+                      00017 
+                      00018 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00019 ;*                    PAGINAÇÃO DE MEMÓRIA                         *
+                      00020 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00021 ;DEFINIÇÃO DE COMANDOS DE USUÁRIO PARA ALTERAÇÃO DA PÁGINA DE MEMÓRIA
+                      00022 #DEFINE BANK0   BCF STATUS,RP0  ;SETA BANK 0 DE MEMÓRIA
+                      00023 #DEFINE BANK1   BSF STATUS,RP0  ;SETA BANK 1 DE MAMÓRIA
+                      00024 
+                      00025 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00026 ;*                         VARIÁVEIS                               *
+                      00027 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00028 ; DEFINIÇÃO DOS NOMES E ENDEREÇOS DE TODAS AS VARIÁVEIS UTILIZADAS 
+                      00029 ; PELO SISTEMA
+                      00030 
+                      00031         CBLOCK  0x20    ;ENDEREÇO INICIAL DA MEMÓRIA DE
+                      00032                                         ;USUÁRIO
+  00000020            00033                 W_TEMP            ;REGISTRADORES TEMPORÁRIOS PARA USO
+  00000021            00034                 STATUS_TEMP       ;JUNTO ÀS INTERRUPÇÕE
+  00000022            00035                 INTERRUPTOR
+  00000023            00036                 CONTADOR
+  00000024            00037                 VALORDIGITAL
+  00000025            00038                 TENSAO_4V
+  00000026            00039                 TENSAO_3V
+  00000027            00040                 TENSAO_2V
+  00000028            00041                 CORRENTE_WDT
+                      00042                 
+                      00043         
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00044         
+                      00045                 ;COLOQUE AQUI SUAS NOVAS VARIÁVEIS
+                      00046                 ;NÃO ESQUEÇA COMENTÁRIOS ESCLARECEDORES
+                      00047 
+                      00048         ENDC                    ;FIM DO BLOCO DE DEFINIÇÃO DE VARIÁVEIS
+                      00049 
+                      00050 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00051 ;*                        FLAGS INTERNOS                           *
+                      00052 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00053 ; DEFINIÇÃO DE TODOS OS FLAGS UTILIZADOS PELO SISTEMA
+                      00054 
+                      00055 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00056 ;*                         CONSTANTES                              *
+                      00057 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00058 ; DEFINIÇÃO DE TODAS AS CONSTANTES UTILIZADAS PELO SISTEMA
+                      00059 
+                      00060 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00061 ;*                           ENTRADAS                              *
+                      00062 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00063 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO ENTRADA
+                      00064 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00065 
+                      00066 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00067 ;*                           SAÍDAS                                *
+                      00068 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00069 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO SAÍDA
+                      00070 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00071 
+                      00072 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00073 ;*                       VETOR DE RESET                            *
+                      00074 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00075 
+0000                  00076         ORG     0x00                    ;ENDEREÇO INICIAL DE PROCESSAMENTO
+0000   2827           00077         GOTO    INICIO
+                      00078         
+                      00079         
+                      00080 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00081 ;*                    INÍCIO DA INTERRUPÇÃO                        *
+                      00082 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00083 ; ENDEREÇO DE DESVIO DAS INTERRUPÇÕES. A PRIMEIRA TAREFA É SALVAR OS
+                      00084 ; VALORES DE "W" E "STATUS" PARA RECUPERAÇÃO FUTURA
+                      00085 
+0004                  00086         ORG     0x04                    ;ENDEREÇO INICIAL DA INTERRUPÇÃO
+0004   00A0           00087         MOVWF   W_TEMP          ;COPIA W PARA W_TEMP
+0005   0E03           00088         SWAPF   STATUS,W
+0006   00A1           00089         MOVWF   STATUS_TEMP     ;COPIA STATUS PARA STATUS_TEMP
+                      00090         
+                      00091 
+                      00092 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00093 ;*                    ROTINA DE INTERRUPÇÃO                        *
+                      00094 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00095 ; AQUI SERÃO ESCRITAS AS ROTINAS DE RECONHECIMENTO E TRATAMENTO DAS
+                      00096 ; INTERRUPÇÕES
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00097         ; VERIFICANDO A POSIÇÃO DA INTERRUPÇAÕ
+                      00098 
+                      00099 
+                      00100         
+                      00101 
+                      00102         
+                      00103 
+                      00104 
+                      00105 
+                      00106         
+                      00107         
+                      00108 
+                      00109 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00110 ;*                 ROTINA DE SAÍDA DA INTERRUPÇÃO                  *
+                      00111 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00112 ; OS VALORES DE "W" E "STATUS" DEVEM SER RECUPERADOS ANTES DE 
+                      00113 ; RETORNAR DA INTERRUPÇÃO
+                      00114 
+0007                  00115 SAI_INT
+0007   0E21           00116         SWAPF   STATUS_TEMP,W
+0008   0083           00117         MOVWF   STATUS          ;MOVE STATUS_TEMP PARA STATUS
+0009   0EA0           00118         SWAPF   W_TEMP,F
+000A   0E20           00119         SWAPF   W_TEMP,W        ;MOVE W_TEMP PARA W
+000B   0009           00120         RETFIE
+                      00121         
+                      00122 
+                      00123 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00124 ;*                       ROTINAS E SUBROTINAS                      *
+                      00125 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00126 ; CADA ROTINA OU SUBROTINA DEVE POSSUIR A DESCRIÇÃO DE FUNCIONAMENTO
+                      00127 ; E UM NOME COERENTE ÀS SUAS FUNÇÕES.
+                      00128 
+                      00129 
+                      00130 
+                      00131         ;CORPO DA ROTINA
+000C                  00132 TRATA_SINALC1 ;CASO 1, TENSÃO MENOR QUE 2V
+000C   0827           00133         MOVFW TENSAO_2V                     ; MOVENDO O LIMITE DE 2V PARA O WORK PARA COMPARAR COM O VAL
+                            OR CONVERTIDO E VERIFICAR A RESTRIÇÃO DA TABELA 
+000D   0224           00134         SUBWF VALORDIGITAL, W               ; Querendo saber se foi é menor que 2V
+000E   1803           00135         BTFSC STATUS, C                     ; Se o bit c for 0, o numero é menor que o valor referente a
+                            o sinal digital de 2V convertido
+000F   2811           00136         GOTO TRATA_SINALC4                  ; Se pular para esse label já podemos afirmar que a tensão é
+                             maior que 2V       
+0010   281B           00137         GOTO LIGA1
+0011                  00138 TRATA_SINALC4 ;CASO 4, TENSÃO MAIOR QUE 4V
+0011   0825           00139         MOVFW TENSAO_4V                    ; MOVENDO O LIMITE DE 4V PARA O WORK PARA COMPARAR COM O VALO
+                            R CONVERTIDO E VERIFICAR A RESTRIÇÃO DA TABELA  
+0012   0224           00140         SUBWF VALORDIGITAL, W               ; Querendo saber se é MAIOR que 4V
+0013   1C03           00141         BTFSS STATUS, C                     ; Se o bit c for 1, o numero é maior que o valor referente a
+                            o sinal digital de 4V convertido
+0014   2816           00142         GOTO TRATA_SINALC3                  ; Se pular para esse podemos afirmar que a tensão é menor qu
+                            e 4V e maior que 2V                        
+0015   2824           00143         GOTO LIGA5
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0016                  00144 TRATA_SINALC3 ;CASO 3, TENSÃO MAIOR QUE 3V E MENOR QUE 4V
+0016   0826           00145         MOVFW TENSAO_3V                    ; MOVENDO O LIMITE DE 3V PARA O WORK PARA COMPARAR COM O VALO
+                            R CONVERTIDO E VERIFICAR A RESTRIÇÃO DA TABELA  
+0017   0224           00146         SUBWF VALORDIGITAL, W               ; Querendo saber se é MAIOR que 3V
+0018   1C03           00147         BTFSS STATUS, C                     ; Se o bit c for 1, o numero é maior que o valor referente a
+                            o sinal digital de 3V convertido
+0019   281E           00148         GOTO LIGA2                          ; Se pular para esse podemos afirmar que a tensão é menor qu
+                            e 4V e maior que 2V e menor que 3V                       
+001A   2821           00149         GOTO LIGA4
+                      00150 
+                      00151         
+                      00152         
+001B                  00153 LIGA1
+001B   0185           00154         CLRF GPIO
+001C   1485           00155         BSF GPIO, GP1
+001D   283F           00156         GOTO DORME
+001E                  00157 LIGA2   
+001E   0185           00158         CLRF GPIO
+001F   1505           00159         BSF GPIO, GP2
+0020   283F           00160         GOTO DORME
+0021                  00161 LIGA4
+0021   0185           00162         CLRF GPIO
+0022   1605           00163         BSF GPIO, GP4
+0023   283F           00164         GOTO DORME
+0024                  00165 LIGA5
+0024   0185           00166         CLRF GPIO
+0025   1685           00167         BSF GPIO, GP5
+0026   283F           00168         GOTO DORME
+                      00169 
+                      00170 
+                      00171  
+                      00172 
+                      00173 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00174 ;*                     INICIO DO PROGRAMA                          *
+                      00175 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00176         
+0027                  00177 INICIO
+0027   1683           00178         BANK1                   ;ALTERA PARA O BANCO 1
+0028   3001           00179         MOVLW   B'00000001'     ;CONFIGUREI O GP0 COMO ENTRADA POIS FOI DEMANDADO PELA ATIVIDADE E OS OU
+                            TROS SÃO SAÍDAS, COM exceção gp3 que não muda
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0029   0085           00180         MOVWF   TRISIO          ;COMO SAÍDAS
+002A   3011           00181         MOVLW   B'00010001'     ;ANSEL CONFIGURADO COMO ENTRADA ANALÓGICA REFERENTE A GP0 e divisão 8
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002B   009F           00182         MOVWF   ANSEL           ;DEFINE PORTAS COMO Digital I/O
+002C   300F           00183         MOVLW   B'00001111'     ; AJUSTEI O PRE-ESCALE PARA 1:128 E SETEI O BIT 3 INDICANDO QUE É REFERE
+                            NTE AO WATCHDOG
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002D   0081           00184         MOVWF   OPTION_REG      ;DEFINE OPÇÕES DE OPERAÇÃO
+002E   3000           00185         MOVLW   B'00000000'     ;NÃO PRECISA CONFIGURAR PARA USAR A FLAG DO ESTOURO
+002F   008B           00186         MOVWF   INTCON          ;DEFINE OPÇÕES DE INTERRUPÇÕES
+0030   3000           00187         MOVLW   B'00000000'     ;N utilizarei interrupção 
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0031   0096           00188         MOVWF   IOC             ;DEFINE OPÇÕES DE INTERRUPÇÕES
+0032   3000           00189         MOVLW   B'00000000'     ;NÃO UTILIZAREI
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0033   0099           00190         MOVWF   VRCON
+0034   1283           00191         BANK0                           ;RETORNA PARA O BANCO
+0035   3001           00192         MOVLW   B'00000001'     ;HABILITEI E CONVERSOR E e selecionei o canal analógico 0 referente ao g
+                            p0
+0036   009F           00193         MOVWF   ADCON0 
+0037   3000           00194         MOVLW   B'00000000'     ; 
+0038   0099           00195         MOVWF   CMCON           ;DEFINE O MODO DE OPERAÇÃO DO COMPARADOR ANALÓGICO
+                      00196 
+                      00197 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00198 ;*                     INICIALIZAÇÃO DAS VARIÁVEIS                 *
+                      00199 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00200 
+                      00201 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00202 ;*                     ROTINA PRINCIPAL                            *
+                      00203 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+0039                  00204 VARIAVEIS ;Nessa label são armazenados os valores de sinais convertidos referentes a cada tensão 
+0039   30CC           00205         MOVLW .204
+003A   00A5           00206         MOVWF TENSAO_4V
+003B   3099           00207         MOVLW .153
+003C   00A6           00208         MOVWF TENSAO_3V
+003D   3066           00209         MOVLW .102
+003E   00A7           00210         MOVWF TENSAO_2V 
+003F                  00211 DORME   ;Label que fará o microcontrolador dormir
+003F   0063           00212         SLEEP               ; O MICRO ACORDARÁ QUANDO WDT ESTOURAR, COM O PRE-SCALE DE 128
+0040   0000           00213         NOP
+0041   0064           00214         CLRWDT
+0042   149F           00215         BSF ADCON0, 1         ; INICIANDO A CONVERSÃO
+0043                  00216 CONVERSOR
+0043   189F           00217         BTFSC ADCON0, 1                     ;Testo o mesmo bit go/done se foi para 0, pois indicará para
+                             mim se a conversão foi finalizada 
+0044   2843           00218         GOTO CONVERSOR                      ; Fica no loop enquantonão tiver terminado a conversão
+0045   081E           00219         MOVFW ADRESH                        ; Movendo o valor da conversão que estará contido no adresh,
+                             pois configurei o registrador ADCON0 com a justificativa pela esquerda 
+0046   00A4           00220         MOVWF VALORDIGITAL                  ; Salvando esse sinal analógico convertido para digital em u
+                            ma variável para tratar futuramente
+0047                  00221 FORAINTERVALO1                              ; Label para caso o estímulo não se encaixe em nenhum dos in
+                            tervalos, se satisfazer as instruções abaixo, significa que pode ser analizado
+0047   0827           00222         MOVFW TENSAO_2V                     ; MOVENDO O LIMITE DE 2V PARA O WORK PARA COMPARAR COM O VAL
+                            OR CONVERTIDO E VERIFICAR A RESTRIÇÃO DA TABELA 
+0048   0224           00223         SUBWF VALORDIGITAL, W               ; Querendo saber se foi é menor que 2V
+0049   1903           00224         BTFSC STATUS, Z                     ; Se o bit z for 1, o numero é igual ao o valor referente ao
+                             sinal digital de 2V convertido
+004A   2854           00225         GOTO FIM                            ; Se pular para esse label já podemos afirmar que a tensão é
+                             IGUAL a 2V, logo não se encaixa em nenhuma restrição da tabela       
+004B   0826           00226         MOVFW TENSAO_3V                     ; MOVENDO O LIMITE DE 3V PARA O WORK PARA COMPARAR COM O VAL
+                            OR CONVERTIDO E VERIFICAR A RESTRIÇÃO DA TABELA  
+004C   0224           00227         SUBWF VALORDIGITAL, W               ; Querendo saber se é IGUAL que 3V
+004D   1903           00228         BTFSC STATUS, Z                     ; Se o bit z for 1, o numero é igual ao o valor referente ao
+                             sinal digital de 3V convertido
+004E   2854           00229         GOTO FIM                            ; Se pular para esse label já podemos afirmar que a tensão é
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                             IGUAL a 3V, logo não se encaixa em nenhuma restrição da tabela                       
+004F   0825           00230         MOVFW TENSAO_4V                    ; MOVENDO O LIMITE DE 4V PARA O WORK PARA COMPARAR COM O VALO
+                            R CONVERTIDO E VERIFICAR A RESTRIÇÃO DA TABELA  
+0050   0224           00231         SUBWF VALORDIGITAL, W               ; Querendo saber se é IGUAL que 4V
+0051   1803           00232         BTFSC STATUS, C                     ; Se o bit z for 1, o numero é igual ao o valor referente ao
+                             sinal digital de 3V convertido
+0052   2854           00233         GOTO FIM                            ; Se pular para esse podemos afirmar que a tensão é IGUAL a 
+                            4V                         
+0053   200C           00234         CALL TRATA_SINALC1
+                      00235 
+                      00236 
+                      00237 
+                      00238 
+                      00239 
+0054                  00240 FIM
+                      00241         
+                      00242 
+                      00243 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00244 ;*                       FIM DO PROGRAMA                           *
+                      00245 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00246 
+                      00247         END
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADCON0                            0000001F
+ADCS0                             00000004
+ADCS1                             00000005
+ADCS2                             00000006
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANS0                              00000000
+ANS1                              00000001
+ANS2                              00000002
+ANS3                              00000003
+ANSEL                             0000009F
+BANK0                             BCF STATUS,RP0
+BANK1                             BSF STATUS,RP0
+C                                 00000000
+CAL0                              00000002
+CAL1                              00000003
+CAL2                              00000004
+CAL3                              00000005
+CAL4                              00000006
+CAL5                              00000007
+CHS0                              00000002
+CHS1                              00000003
+CINV                              00000004
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             00000019
+CMIE                              00000003
+CMIF                              00000003
+CONTADOR                          00000023
+CONVERSOR                         00000043
+CORRENTE_WDT                      00000028
+COUT                              00000006
+DC                                00000001
+DORME                             0000003F
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDAT                             0000009A
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+FIM                               00000054
+FORAINTERVALO1                    00000047
+FSR                               00000004
+GIE                               00000007
+GO                                00000001
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GP4                               00000004
+GP5                               00000005
+GPIE                              00000003
+GPIF                              00000000
+GPIO                              00000005
+GPIO0                             00000000
+GPIO1                             00000001
+GPIO2                             00000002
+GPIO3                             00000003
+GPIO4                             00000004
+GPIO5                             00000005
+INDF                              00000000
+INICIO                            00000027
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTERRUPTOR                       00000022
+INTF                              00000001
+IOC                               00000096
+IOC0                              00000000
+IOC1                              00000001
+IOC2                              00000002
+IOC3                              00000003
+IOC4                              00000004
+IOC5                              00000005
+IOCB                              00000096
+IOCB0                             00000000
+IOCB1                             00000001
+IOCB2                             00000002
+IOCB3                             00000003
+IOCB4                             00000004
+IOCB5                             00000005
+IRP                               00000007
+LIGA1                             0000001B
+LIGA2                             0000001E
+LIGA4                             00000021
+LIGA5                             00000024
+NOT_BOD                           00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_GPPU                          00000007
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OPTION_REG                        00000081
+OSCCAL                            00000090
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PIE1                              0000008C
+PIR1                              0000000C
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+SAI_INT                           00000007
+STATUS                            00000003
+STATUS_TEMP                       00000021
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1IE                              00000000
+T1IF                              00000000
+T1OSCEN                           00000003
+TENSAO_2V                         00000027
+TENSAO_3V                         00000026
+TENSAO_4V                         00000025
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TRATA_SINALC1                     0000000C
+TRATA_SINALC3                     00000016
+TRATA_SINALC4                     00000011
+TRISIO                            00000085
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+TRISIO4                           00000004
+TRISIO5                           00000005
+VALORDIGITAL                      00000024
+VARIAVEIS                         00000039
+VCFG                              00000006
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000099
+VREN                              00000007
+VRR                               00000005
+W                                 00000000
+WPU                               00000095
+WPU0                              00000000
+WPU1                              00000001
+WPU2                              00000002
+WPU4                              00000004
+WPU5                              00000005
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+W_TEMP                            00000020
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00003F7F
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FOSC_EC                          00003FFB
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRCCLK                    00003FFD
+_FOSC_INTRCIO                     00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+MPASM 5.77                       MEDIDOR.ASM   11-11-2021  13:08:09         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FF9
+__12F675                          00000001
+__DEBUG                           
+__MPLAB_DEBUGGER_SIMULATOR        1
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : X---XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXX------------ ---------------- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:    81
+Program Memory Words Free:   943
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     5 reported,     0 suppressed
+
+

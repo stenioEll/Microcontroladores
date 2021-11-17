@@ -1,0 +1,16 @@
+Message[301] C:\PROGRAM FILES (X86)\MICROCHIP\MPLABX\V4.20\MPASMX\P12F675.INC 34 : MESSAGE: (Processor-header file mismatch.  Verify selected processor.)
+Message[305] C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 169 : Using default destination of 1 (file).
+Error[128]   C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 173 : Missing argument(s)
+Message[305] C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 187 : Using default destination of 1 (file).
+Error[128]   C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 191 : Missing argument(s)
+Message[305] C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 204 : Using default destination of 1 (file).
+Error[128]   C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 208 : Missing argument(s)
+Error[113]   C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 212 : Symbol not previously defined (TESTEGP0_ON)
+Error[113]   C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 220 : Symbol not previously defined (TESTE500hz)
+Message[305] C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 221 : Using default destination of 1 (file).
+Error[128]   C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 225 : Missing argument(s)
+Error[113]   C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 229 : Symbol not previously defined (TESTEGP0_ON)
+Message[302] C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 239 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 241 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 243 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\USERS\STENI\DOCUMENTS\NOVA PASTA (3)\TRAB5.X\INTER.ASM 247 : Register in operand not in bank 0.  Ensure that bank bits are correct.

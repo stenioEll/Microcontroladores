@@ -1,0 +1,622 @@
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00002 ;*              MODIFICAÇÕES PARA USO COM 12F675                   *
+                      00003 ;*                FEITAS PELO PROF. MARDSON                        *
+                      00004 ;*                      MARÇO DE 2021                              *
+                      00005 ;*                 BASEADO NO EXEMPLO DO LIVRO                     *
+                      00006 ;*           Desbravando o PIC. David José de Souza                *
+                      00007 ;*-----------------------------------------------------------------*
+                      00008 ;*   MODELO PARA O PIC 12F675                                      *
+                      00009 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00010 
+                      00011 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00012 ;*                     ARQUIVOS DE DEFINIÇÕES                      *
+                      00013 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00014 #INCLUDE <p12f675.inc>  ;ARQUIVO PADRÃO MICROCHIP PARA 12F675
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Nov 22 2017
+                      00005 ;  MPASM PIC12F675 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+Message[301]: MESSAGE: (Processor-header file mismatch.  Verify selected processor.)
+                      00367         LIST
+                      00015 
+2007   3FA4           00016         __CONFIG _BODEN_OFF & _CP_OFF & _PWRTE_ON & _WDT_OFF & _MCLRE_ON & _INTRC_OSC_NOCLKOUT
+                      00017 
+                      00018 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00019 ;*                    PAGINAÇÃO DE MEMÓRIA                         *
+                      00020 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00021 ;DEFINIÇÃO DE COMANDOS DE USUÁRIO PARA ALTERAÇÃO DA PÁGINA DE MEMÓRIA
+                      00022 #DEFINE BANK0   BCF STATUS,RP0  ;SETA BANK 0 DE MEMÓRIA
+                      00023 #DEFINE BANK1   BSF STATUS,RP0  ;SETA BANK 1 DE MAMÓRIA
+                      00024 
+                      00025 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00026 ;*                         VARIÁVEIS                               *
+                      00027 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00028 ; DEFINIÇÃO DOS NOMES E ENDEREÇOS DE TODAS AS VARIÁVEIS UTILIZADAS 
+                      00029 ; PELO SISTEMA
+                      00030 
+                      00031         CBLOCK  0x20    ;ENDEREÇO INICIAL DA MEMÓRIA DE
+                      00032                                         ;USUÁRIO
+  00000020            00033                 W_TEMP            ;REGISTRADORES TEMPORÁRIOS PARA USO
+  00000021            00034                 STATUS_TEMP       ;JUNTO ÀS INTERRUPÇÕE
+  00000022            00035                 INTERRUPTOR
+  00000023            00036                 CONTADOR
+  00000024            00037                 PERIODO
+  00000025            00038                 VALORDIGITAL
+                      00039                 ;COLOQUE AQUI SUAS NOVAS VARIÁVEIS
+                      00040                 ;NÃO ESQUEÇA COMENTÁRIOS ESCLARECEDORES
+                      00041 
+                      00042         ENDC                    ;FIM DO BLOCO DE DEFINIÇÃO DE VARIÁVEIS
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00043 
+                      00044 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00045 ;*                        FLAGS INTERNOS                           *
+                      00046 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00047 ; DEFINIÇÃO DE TODOS OS FLAGS UTILIZADOS PELO SISTEMA
+                      00048 
+                      00049 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00050 ;*                         CONSTANTES                              *
+                      00051 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00052 ; DEFINIÇÃO DE TODAS AS CONSTANTES UTILIZADAS PELO SISTEMA
+                      00053 
+                      00054 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00055 ;*                           ENTRADAS                              *
+                      00056 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00057 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO ENTRADA
+                      00058 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00059 
+                      00060 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00061 ;*                           SAÍDAS                                *
+                      00062 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00063 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO SAÍDA
+                      00064 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00065 
+                      00066 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00067 ;*                       VETOR DE RESET                            *
+                      00068 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00069 
+                      00070         ORG     0x00                    ;ENDEREÇO INICIAL DE PROCESSAMENTO
+0000   2???           00071         GOTO    INICIO
+                      00072         
+                      00073         
+                      00074 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00075 ;*                    INÍCIO DA INTERRUPÇÃO                        *
+                      00076 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00077 ; ENDEREÇO DE DESVIO DAS INTERRUPÇÕES. A PRIMEIRA TAREFA É SALVAR OS
+                      00078 ; VALORES DE "W" E "STATUS" PARA RECUPERAÇÃO FUTURA
+                      00079 
+                      00080         ORG     0x04                    ;ENDEREÇO INICIAL DA INTERRUPÇÃO
+0004   00A0           00081         MOVWF   W_TEMP          ;COPIA W PARA W_TEMP
+0005   0E03           00082         SWAPF   STATUS,W
+0006   00A1           00083         MOVWF   STATUS_TEMP     ;COPIA STATUS PARA STATUS_TEMP
+                      00084         
+                      00085 
+                      00086 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00087 ;*                    ROTINA DE INTERRUPÇÃO                        *
+                      00088 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00089 ; AQUI SERÃO ESCRITAS AS ROTINAS DE RECONHECIMENTO E TRATAMENTO DAS
+                      00090 ; INTERRUPÇÕES
+                      00091         ; VERIFICANDO A POSIÇÃO DA INTERRUPÇAÕ
+                      00092 
+                      00093 
+                      00094         
+                      00095 
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00096         
+                      00097 
+                      00098 
+                      00099 
+                      00100         
+                      00101         
+                      00102 
+                      00103 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00104 ;*                 ROTINA DE SAÍDA DA INTERRUPÇÃO                  *
+                      00105 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00106 ; OS VALORES DE "W" E "STATUS" DEVEM SER RECUPERADOS ANTES DE 
+                      00107 ; RETORNAR DA INTERRUPÇÃO
+                      00108 
+0007                  00109 SAI_INT
+0007   0E21           00110         SWAPF   STATUS_TEMP,W
+0008   0083           00111         MOVWF   STATUS          ;MOVE STATUS_TEMP PARA STATUS
+0009   0EA0           00112         SWAPF   W_TEMP,F
+000A   0E20           00113         SWAPF   W_TEMP,W        ;MOVE W_TEMP PARA W
+000B   0009           00114         RETFIE
+000C   2???           00115         GOTO MAIN
+                      00116 
+                      00117 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00118 ;*                       ROTINAS E SUBROTINAS                      *
+                      00119 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00120 ; CADA ROTINA OU SUBROTINA DEVE POSSUIR A DESCRIÇÃO DE FUNCIONAMENTO
+                      00121 ; E UM NOME COERENTE ÀS SUAS FUNÇÕES.
+                      00122 
+                      00123 
+                      00124 
+                      00125         ;CORPO DA ROTINA
+000D                  00126 TRATA_SINAL1
+000D   0180           00127         CLRF W
+000E   30FF           00128         MOVLW .255                          ; Valor digital de 5V
+000F   0225           00129         SUBWF VALORDIGITAL, W               ; Querendo saber se foi 5V
+0010   1803           00130         BTFSC STATUS, C                     ; Se o bit c for 0, o numero é menor que o valor referente a
+                            o sinal digital de 5V convertido
+0011   2???           00131         GOTO TRATA_SINAL2
+0012   2???           00132         GOTO DESLIGALED
+0013                  00133 TRATA_SINAL2
+0013   0180           00134         CLRF W
+0014   30CC           00135         MOVLW .204                          ; Valor digital de 4V
+0015   0225           00136         SUBWF VALORDIGITAL, W               ; Querendo saber se foi 4V
+0016   1803           00137         BTFSC STATUS, C                     ; Se o bit c for 0, o numero é menor que o valor referente a
+                            o sinal digital de 4V convertido
+0017   2???           00138         GOTO TRATA_SINAL3
+0018   2???           00139         GOTO TRATA_4V
+0019                  00140 TRATA_SINAL3
+0019   0180           00141         CLRF W
+001A   3099           00142         MOVLW .153                          ; Valor digital de 3V
+001B   0225           00143         SUBWF VALORDIGITAL, W               ; Querendo saber se foi 3V
+001C   1803           00144         BTFSC STATUS, C                     ; Se o bit c for 0, o numero é menor que o valor referente a
+                            o sinal digital de 3V convertido
+001D   2???           00145         GOTO TRATA_SINAL4
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+001E   2???           00146         GOTO TRATA_3V
+001F                  00147 TRATA_SINAL4
+001F   0180           00148         CLRF W
+0020   3066           00149         MOVLW .102                          ; Valor digital de 2V
+0021   0225           00150         SUBWF VALORDIGITAL, W               ; Querendo saber se foi 2V
+0022   1803           00151         BTFSC STATUS, C                     ; Se o bit c for 0, o numero é menor que o valor referente a
+                            o sinal digital de 2V convertido
+0023   2???           00152         GOTO TRATA_SINAL5
+0024   2???           00153         GOTO TRATA_2V
+0025                  00154 TRATA_SINAL5
+0025   0180           00155         CLRF W
+0026   3033           00156         MOVLW .51                           ; Valor digital de 1V
+0027   0225           00157         SUBWF VALORDIGITAL, W               ; Querendo saber se foi 1V
+0028   1803           00158         BTFSC STATUS, C                     ; Se o bit c for 0, o numero é menor que o valor referente a
+                            o sinal digital de 1V convertido
+0029   2???           00159         GOTO DESLIGALED
+002A   2???           00160         GOTO TRATA_1V
+002B                  00161 TRATA_4V
+002B   1405           00162         BSF GPIO, GP0
+002C   0181           00163         CLRF TMR0               ;ZERANDO O TMR0
+002D   3019           00164         MOVLW .25               ; inicializando com o valor gerado da diferenã de 64 - 39 = 25 para prov
+                            ocar o estouro em 20 us
+002E   0081           00165         MOVWF TMR0              
+002F                  00166 TESTE400hz
+002F   1D0B           00167         BTFSS INTCON, T0IF      ; estourou? Sim! vai incrementar a variavel
+0030   2???           00168         GOTO TESTE300hz
+Message[305]: Using default destination of 1 (file).
+0031   0AA3           00169         INCF CONTADOR
+0032   3001           00170         MOVLW .1                ; VERIFICANDO SE CONTOU 1 VEZES 2,5K
+0033   0223           00171         SUBWF CONTADOR, W
+0034   1803           00172         BTFSC STATUS, C         ; SE TIVER CONTADO 2K 1 VEZ, TEREMOS 2,5K us e
+Error[128]  : Missing argument(s)
+0034   1803           00173         GOTO 
+0035   110B           00174         BCF INTCON, T0IF
+0036   0181           00175         CLRF TMR0               ;ZERANDO O TMR0
+0037   2???           00176         GOTO LIGALED
+                      00177         
+0038                  00178 TRATA_3V
+0038   1405           00179         BSF GPIO, GP0
+0039   0181           00180         CLRF TMR0               ;ZERANDO O TMR0
+003A   3019           00181         MOVLW .25               ; inicializando com o valor gerado da diferenã de 64 - 39 = 25 para prov
+                            ocar o estouro em 20 us
+003B   0081           00182         MOVWF TMR0      
+                      00183 
+003C                  00184 TESTE300hz
+003C   1D0B           00185         BTFSS INTCON, T0IF      ; estourou? Sim! vai incrementar a variavel
+003D   2???           00186         GOTO TESTE200hz
+Message[305]: Using default destination of 1 (file).
+003E   0AA3           00187         INCF CONTADOR
+003F   3001           00188         MOVLW .1                ; VERIFICANDO SE CONTOU 1 VEZES 2,5K
+0040   0223           00189         SUBWF CONTADOR, W
+0041   1803           00190         BTFSC STATUS, C         ; SE TIVER CONTADO 2K 1 VEZ, TEREMOS 2,5K us e
+Error[128]  : Missing argument(s)
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0041   1803           00191         GOTO 
+0042   110B           00192         BCF INTCON, T0IF
+0043   0181           00193         CLRF TMR0               ;ZERANDO O TMR0
+0044   2???           00194         GOTO LIGALED
+0045                  00195 TRATA_2V
+0045   1405           00196         BSF GPIO, GP0
+0046   0181           00197         CLRF TMR0               ;ZERANDO O TMR0
+0047   3019           00198         MOVLW .25               ; inicializando com o valor gerado da diferenã de 64 - 39 = 25 para prov
+                            ocar o estouro em 20 us
+0048   0081           00199         MOVWF TMR0
+                      00200 
+0049                  00201 TESTE200hz
+0049   1D0B           00202         BTFSS INTCON, T0IF      ; estourou? Sim! vai incrementar a variavel
+004A   2???           00203         GOTO TESTE100hz
+Message[305]: Using default destination of 1 (file).
+004B   0AA3           00204         INCF CONTADOR
+004C   3001           00205         MOVLW .1                ; VERIFICANDO SE CONTOU 1 VEZES 2,5K
+004D   0223           00206         SUBWF CONTADOR, W
+004E   1803           00207         BTFSC STATUS, C         ; SE TIVER CONTADO 2K 1 VEZ, TEREMOS 2,5K us e
+Error[128]  : Missing argument(s)
+004E   1803           00208         GOTO 
+004F   110B           00209         BCF INTCON, T0IF
+0050   0181           00210         CLRF TMR0               ;ZERANDO O TMR0
+0051   2???           00211         GOTO LIGALED
+Error[113]  : Symbol not previously defined (TESTEGP0_ON)
+0052   2800           00212         GOTO TESTEGP0_ON
+0053                  00213 TRATA_1V
+0053   1405           00214         BSF GPIO, GP0
+0054   0181           00215         CLRF TMR0               ;ZERANDO O TMR0
+0055   3019           00216         MOVLW .25               ; inicializando com o valor gerado da diferenã de 64 - 39 = 25 para prov
+                            ocar o estouro em 20 us
+0056   0081           00217         MOVWF TMR0
+0057                  00218 TESTE100hz
+0057   1D0B           00219         BTFSS INTCON, T0IF      ; estourou? Sim! vai incrementar a variavel
+Error[113]  : Symbol not previously defined (TESTE500hz)
+0058   2800           00220         GOTO TESTE500hz
+Message[305]: Using default destination of 1 (file).
+0059   0AA3           00221         INCF CONTADOR
+005A   3001           00222         MOVLW .1                ; VERIFICANDO SE CONTOU 1 VEZES 2,5K
+005B   0223           00223         SUBWF CONTADOR, W
+005C   1803           00224         BTFSC STATUS, C         ; SE TIVER CONTADO 2K 1 VEZ, TEREMOS 2,5K us e
+Error[128]  : Missing argument(s)
+005C   1803           00225         GOTO 
+005D   110B           00226         BCF INTCON, T0IF
+005E   0181           00227         CLRF TMR0               ;ZERANDO O TMR0
+005F   2???           00228         GOTO LIGALED
+Error[113]  : Symbol not previously defined (TESTEGP0_ON)
+0060   2800           00229         GOTO TESTEGP0_ON
+                      00230  
+                      00231 
+                      00232 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00233 ;*                     INICIO DO PROGRAMA                          *
+                      00234 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00235         
+0061                  00236 INICIO
+0061   1683           00237         BANK1                           ;ALTERA PARA O BANCO 1
+0062   3010           00238         MOVLW   B'00010000'     ;CONFIGUREI O GP4 COMO ENTRADA, POIS FOI DEMANDADO PELA ATIVIDADE E OS O
+                            UTROS SÃO SAÍDAS, COM exceção gp3 que não muda
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0063   0085           00239         MOVWF   TRISIO          ;COMO SAÍDAS
+0064   3018           00240         MOVLW   B'00011000'     ;divisor de clock configurado para dividir por 8 e an3 configurado como 
+                            entrada analógico
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0065   009F           00241         MOVWF   ANSEL           ;DEFINE PORTAS COMO Digital I/O
+0066   3005           00242         MOVLW   B'00000101'     ; 1:64
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0067   0081           00243         MOVWF   OPTION_REG      ;DEFINE OPÇÕES DE OPERAÇÃO
+0068   30A0           00244         MOVLW   B'10100000'     ;lIGUEI A INTERRUPÇÃO PARA O ESTOURO 
+0069   008B           00245         MOVWF   INTCON          ;DEFINE OPÇÕES DE INTERRUPÇÕES
+006A   3000           00246         MOVLW   B'00000000'     ;N utilizarei interrupção 
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+006B   0096           00247         MOVWF   IOC             ;DEFINE OPÇÕES DE INTERRUPÇÕES
+006C   1283           00248         BANK0                           ;RETORNA PARA O BANCO
+006D   300D           00249         MOVLW   B'00001101'     ;habilitei o conversor e selecionei o canal analógico 3 referente ao gp4
+006E   009F           00250         MOVWF   ADCON0 
+006F   3007           00251         MOVLW   B'00000111'
+0070   0099           00252         MOVWF   CMCON           ;DEFINE O MODO DE OPERAÇÃO DO COMPARADOR ANALÓGICO
+                      00253 
+                      00254 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00255 ;*                     INICIALIZAÇÃO DAS VARIÁVEIS                 *
+                      00256 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00257 
+                      00258 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00259 ;*                     ROTINA PRINCIPAL                            *
+                      00260 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+0071                  00261 MAIN
+0071   149F           00262         BSF ADCON0,1                         ;Setando o bit go/done para iniciar a conversão
+0072                  00263 CONV
+0072   189F           00264         BTFSC ADCON0, 1                      ;Testo o mesmo bit go/done se foi para 0, pois indicará par
+                            a mim se a conversão foi finalizada 
+0073   2???           00265         GOTO CONV                           ; Fica no loop enquantonão tiver terminado a conversão
+0074   081E           00266         MOVFW ADRESH                        ; Movendo o valor da conversão que estará contido no adresh,
+                             pois configurei o registrador ADCON0 com a justificativa pela esquerda 
+0075   00A5           00267         MOVWF VALORDIGITAL                  ; Salvando esse sinal analógico convertido para digital em u
+                            ma variável para tratar futuramente
+0076   2???           00268         CALL TRATA_SINAL1
+0077                  00269 DESLIGALED
+0077   1005           00270         BCF GPIO, GP0
+0078                  00271 LIGALED
+0078   1405           00272         BSF GPIO, GP0
+                      00273 
+                      00274 
+0079                  00275 FIM
+                      00276         
+                      00277 
+                      00278 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00279 ;*                       FIM DO PROGRAMA                           *
+                      00280 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00281 
+3FA4                  00282         END
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADCON0                            0000001F
+ADCS0                             00000004
+ADCS1                             00000005
+ADCS2                             00000006
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANS0                              00000000
+ANS1                              00000001
+ANS2                              00000002
+ANS3                              00000003
+ANSEL                             0000009F
+BANK0                             BCF STATUS,RP0
+BANK1                             BSF STATUS,RP0
+C                                 00000000
+CAL0                              00000002
+CAL1                              00000003
+CAL2                              00000004
+CAL3                              00000005
+CAL4                              00000006
+CAL5                              00000007
+CHS0                              00000002
+CHS1                              00000003
+CINV                              00000004
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             00000019
+CMIE                              00000003
+CMIF                              00000003
+CONTADOR                          00000023
+CONV                              00000072
+COUT                              00000006
+DC                                00000001
+DESLIGALED                        00000077
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDAT                             0000009A
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+FIM                               00000079
+FSR                               00000004
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GP4                               00000004
+GP5                               00000005
+GPIE                              00000003
+GPIF                              00000000
+GPIO                              00000005
+GPIO0                             00000000
+GPIO1                             00000001
+GPIO2                             00000002
+GPIO3                             00000003
+GPIO4                             00000004
+GPIO5                             00000005
+INDF                              00000000
+INICIO                            00000061
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTERRUPTOR                       00000022
+INTF                              00000001
+IOC                               00000096
+IOC0                              00000000
+IOC1                              00000001
+IOC2                              00000002
+IOC3                              00000003
+IOC4                              00000004
+IOC5                              00000005
+IOCB                              00000096
+IOCB0                             00000000
+IOCB1                             00000001
+IOCB2                             00000002
+IOCB3                             00000003
+IOCB4                             00000004
+IOCB5                             00000005
+IRP                               00000007
+LIGALED                           00000078
+MAIN                              00000071
+NOT_BOD                           00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_GPPU                          00000007
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OPTION_REG                        00000081
+OSCCAL                            00000090
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PERIODO                           00000024
+PIE1                              0000008C
+PIR1                              0000000C
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+SAI_INT                           00000007
+STATUS                            00000003
+STATUS_TEMP                       00000021
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1IE                              00000000
+T1IF                              00000000
+T1OSCEN                           00000003
+TESTE100hz                        00000057
+TESTE200hz                        00000049
+TESTE300hz                        0000003C
+TESTE400hz                        0000002F
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TRATA_1V                          00000053
+TRATA_2V                          00000045
+TRATA_3V                          00000038
+TRATA_4V                          0000002B
+TRATA_SINAL1                      0000000D
+TRATA_SINAL2                      00000013
+TRATA_SINAL3                      00000019
+TRATA_SINAL4                      0000001F
+TRATA_SINAL5                      00000025
+TRISIO                            00000085
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+TRISIO4                           00000004
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISIO5                           00000005
+VALORDIGITAL                      00000025
+VCFG                              00000006
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000099
+VREN                              00000007
+VRR                               00000005
+W                                 00000000
+WPU                               00000095
+WPU0                              00000000
+WPU1                              00000001
+WPU2                              00000002
+WPU4                              00000004
+WPU5                              00000005
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+W_TEMP                            00000020
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00003F7F
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FOSC_EC                          00003FFB
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRCCLK                    00003FFD
+_FOSC_INTRCIO                     00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+MPASM 5.77                         INTER.ASM   10-15-2021  23:58:04         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FF9
+__12F617                          00000001
+__DEBUG                           
+__MPLAB_DEBUGGER_SIMULATOR        1
+
+Errors   :     7
+Warnings :     0 reported,     0 suppressed
+Messages :     9 reported,     0 suppressed
+
+

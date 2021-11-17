@@ -1,0 +1,66 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Wed Nov 03 17:06:27 2021
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_2       code   0x000000    program   0x000002
+                   .org_3       code   0x000004    program   0x0000b4
+.config_2007_VAZIO_EEPROM.O       code   0x002007    program   0x000002
+                   .org_1       code   0x002100    program   0x000050
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000000      
+                            0x000004    0x00005d      
+                            0x002007    0x002007      
+                            0x002100    0x002127      
+            132 out of 1158 program addresses used, program memory utilization is 11%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  AGUARDA   0x00001f    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  COMPARA   0x00003e    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                      FIM   0x00005d    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  FIMLOOP   0x000054    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+             GRAVA_EEPROM   0x000013    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                   INICIO   0x000025    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  LEITURA   0x000035    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                LE_EEPROM   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                     LOOP   0x000038    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                     MAIN   0x000030    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  ORDENA1   0x000045    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                PERMANECE   0x000051    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  SAI_INT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+               SUBROTINA1   0x000024    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                    TROCA   0x000059    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  SAI_INT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                LE_EEPROM   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+             GRAVA_EEPROM   0x000013    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  AGUARDA   0x00001f    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+               SUBROTINA1   0x000024    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                   INICIO   0x000025    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                     MAIN   0x000030    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  LEITURA   0x000035    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                     LOOP   0x000038    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  COMPARA   0x00003e    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  ORDENA1   0x000045    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                PERMANECE   0x000051    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                  FIMLOOP   0x000054    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                    TROCA   0x000059    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+                      FIM   0x00005d    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE7.X\Vazio_EEPROM.ASM
+
+

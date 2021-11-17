@@ -1,0 +1,864 @@
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00002 ;*              MODIFICAÇÕES PARA USO COM 12F675                   *
+                      00003 ;*                FEITAS PELO PROF. MARDSON                        *
+                      00004 ;*                      MARÇO DE 2021                              *
+                      00005 ;*                 BASEADO NO EXEMPLO DO LIVRO                     *
+                      00006 ;*           Desbravando o PIC. David José de Souza                *
+                      00007 ;*-----------------------------------------------------------------*
+                      00008 ;*   MODELO PARA O PIC 12F675                                      *
+                      00009 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00010 
+                      00011 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00012 ;*                     ARQUIVOS DE DEFINIÇÕES                      *
+                      00013 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00014 #INCLUDE <p12f675.inc>  ;ARQUIVO PADRÃO MICROCHIP PARA 12F675
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Nov 22 2017
+                      00005 ;  MPASM PIC12F675 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00367         LIST
+                      00015 
+2007   3FA4           00016         __CONFIG _BODEN_OFF & _CP_OFF & _PWRTE_ON & _WDT_OFF & _MCLRE_ON & _INTRC_OSC_NOCLKOUT
+                      00017 
+                      00018 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00019 ;*                    PAGINAÇÃO DE MEMÓRIA                         *
+                      00020 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00021 ;DEFINIÇÃO DE COMANDOS DE USUÁRIO PARA ALTERAÇÃO DA PÁGINA DE MEMÓRIA
+                      00022 #DEFINE BANK0   BCF STATUS,RP0  ;SETA BANK 0 DE MEMÓRIA
+                      00023 #DEFINE BANK1   BSF STATUS,RP0  ;SETA BANK 1 DE MAMÓRIA
+                      00024 
+                      00025 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00026 ;*                         VARIÁVEIS                               *
+                      00027 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00028 ; DEFINIÇÃO DOS NOMES E ENDEREÇOS DE TODAS AS VARIÁVEIS UTILIZADAS 
+                      00029 ; PELO SISTEMA
+                      00030 
+                      00031         CBLOCK  0x20    ;ENDEREÇO INICIAL DA MEMÓRIA DE
+                      00032                                         ;USUÁRIO
+  00000020            00033                 W_TEMP            ;REGISTRADORES TEMPORÁRIOS PARA USO
+  00000021            00034                 STATUS_TEMP       ;JUNTO ÀS INTERRUPÇÕE
+  00000022            00035                 DD                ; Dia da data
+  00000023            00036                 MM                ; Mes da data
+  00000024            00037                 AA                ; Ano da data
+  00000025            00038                 formulaBissextoX  ; Formula para o ano Bissexto ano/4
+  00000026            00039                 formulaBissextoY  ; Formula para o ano Bissexto ano/100
+  00000027            00040                 formulaBissextoZ  ; Formula para o ano Bissexto ano/400
+  00000028            00041                 x                 ; Formula para encontrar o resto de FormulaBissextoX
+  00000029            00042                 y                 ; Formula para encontrar o resto de FormulaBissextoY
+  0000002A            00043                 z                 ; Formula para encontrar o resto de FormulaBissextoZ
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  0000002B            00044                 w                 ; Informa o dia (-produto + k )
+  0000002C            00045                 anoLimiteInicial  ; Ano minimo
+  0000002D            00046                 anoLimiteFinal    ; Ano máximo
+  0000002E            00047                 k                 ; fórmula para encontrar o dia
+  0000002F            00048                 contador          ; Contador       
+  00000030            00049                 divisao           ; k/7 
+  00000031            00050                 produto           ; 7*k
+  00000032            00051                 anoIntervaloInicial
+  00000033            00052                 anoIntervaloFinal
+  00000034            00053                 mesIntervaloFinal
+  00000035            00054                 mesLimite
+  00000036            00055                 diaLimite
+  00000037            00056                 contaMes
+                      00057         
+                      00058                 ;COLOQUE AQUI SUAS NOVAS VARIÁVEIS
+                      00059                 ;NÃO ESQUEÇA COMENTÁRIOS ESCLARECEDORES
+                      00060 
+                      00061         ENDC                    ;FIM DO BLOCO DE DEFINIÇÃO DE VARIÁVEIS
+                      00062 
+                      00063 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00064 ;*                        FLAGS INTERNOS                           *
+                      00065 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00066 ; DEFINIÇÃO DE TODOS OS FLAGS UTILIZADOS PELO SISTEMA
+                      00067 
+                      00068 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00069 ;*                         CONSTANTES                              *
+                      00070 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00071 ; DEFINIÇÃO DE TODAS AS CONSTANTES UTILIZADAS PELO SISTEMA
+                      00072 
+                      00073 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00074 ;*                           ENTRADAS                              *
+                      00075 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00076 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO ENTRADA
+                      00077 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00078 
+                      00079 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00080 ;*                           SAÍDAS                                *
+                      00081 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00082 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO SAÍDA
+                      00083 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00084 
+                      00085 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00086 ;*                       VETOR DE RESET                            *
+                      00087 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00088 
+0000                  00089         ORG     0x00                    ;ENDEREÇO INICIAL DE PROCESSAMENTO
+0000   280D           00090         GOTO    INICIO
+                      00091         
+                      00092         
+                      00093 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00094 ;*                    INÍCIO DA INTERRUPÇÃO                        *
+                      00095 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00096 ; ENDEREÇO DE DESVIO DAS INTERRUPÇÕES. A PRIMEIRA TAREFA É SALVAR OS
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00097 ; VALORES DE "W" E "STATUS" PARA RECUPERAÇÃO FUTURA
+                      00098 
+0004                  00099         ORG     0x04                    ;ENDEREÇO INICIAL DA INTERRUPÇÃO
+0004   00A0           00100         MOVWF   W_TEMP          ;COPIA W PARA W_TEMP
+0005   0E03           00101         SWAPF   STATUS,W
+0006   00A1           00102         MOVWF   STATUS_TEMP     ;COPIA STATUS PARA STATUS_TEMP
+                      00103 
+                      00104 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00105 ;*                    ROTINA DE INTERRUPÇÃO                        *
+                      00106 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00107 ; AQUI SERÃO ESCRITAS AS ROTINAS DE RECONHECIMENTO E TRATAMENTO DAS
+                      00108 ; INTERRUPÇÕES
+                      00109 
+                      00110 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00111 ;*                 ROTINA DE SAÍDA DA INTERRUPÇÃO                  *
+                      00112 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00113 ; OS VALORES DE "W" E "STATUS" DEVEM SER RECUPERADOS ANTES DE 
+                      00114 ; RETORNAR DA INTERRUPÇÃO
+                      00115 
+0007                  00116 SAI_INT
+0007   0E21           00117         SWAPF   STATUS_TEMP,W
+0008   0083           00118         MOVWF   STATUS          ;MOVE STATUS_TEMP PARA STATUS
+0009   0EA0           00119         SWAPF   W_TEMP,F
+000A   0E20           00120         SWAPF   W_TEMP,W        ;MOVE W_TEMP PARA W
+000B   0009           00121         RETFIE
+                      00122 
+                      00123 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00124 ;*                       ROTINAS E SUBROTINAS                      *
+                      00125 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00126 ; CADA ROTINA OU SUBROTINA DEVE POSSUIR A DESCRIÇÃO DE FUNCIONAMENTO
+                      00127 ; E UM NOME COERENTE ÀS SUAS FUNÇÕES.
+                      00128 
+000C                  00129 SUBROTINA1
+                      00130 
+                      00131         ;CORPO DA ROTINA
+                      00132 
+000C   0008           00133         RETURN
+                      00134 
+                      00135 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00136 ;*                     INICIO DO PROGRAMA                          *
+                      00137 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00138         
+000D                  00139 INICIO
+000D   1683           00140         BANK1                           ;ALTERA PARA O BANCO 1
+000E   3000           00141         MOVLW   B'00000000' ;CONFIGURA TODAS AS PORTAS DO GPIO (PINOS)
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000F   0085           00142         MOVWF   TRISIO          ;COMO SAÍDAS
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0010   019F           00143         CLRF    ANSEL           ;DEFINE PORTAS COMO Digital I/O
+0011   3004           00144         MOVLW   B'00000100'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0012   0081           00145         MOVWF   OPTION_REG      ;DEFINE OPÇÕES DE OPERAÇÃO
+0013   3000           00146         MOVLW   B'00000000'
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0014   008B           00147         MOVWF   INTCON          ;DEFINE OPÇÕES DE INTERRUPÇÕES
+0015   1283           00148         BANK0                           ;RETORNA PARA O BANCO
+0016   3007           00149         MOVLW   B'00000111'
+0017   0099           00150         MOVWF   CMCON           ;DEFINE O MODO DE OPERAÇÃO DO COMPARADOR ANALÓGICO
+                      00151 
+                      00152 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00153 ;*                     INICIALIZAÇÃO DAS VARIÁVEIS                 *
+                      00154 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00155 
+                      00156 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00157 ;*                     ROTINA PRINCIPAL                            *
+                      00158 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+0018                  00159 MAIN
+                      00160 
+                      00161         ;CORPO DA ROTINA PRINCIPAL
+0018   3004           00162         MOVLW .04
+0019   00AC           00163         MOVWF anoLimiteInicial
+001A   3063           00164         MOVLW .99
+001B   00AD           00165         MOVWF anoLimiteFinal
+001C   3015           00166         MOVLW .21
+001D   00A2           00167         MOVWF DD
+001E   300A           00168         MOVLW .10
+001F   00A3           00169         MOVWF MM
+0020   3015           00170         MOVLW .21
+0021   00A4           00171         MOVWF AA
+                      00172         
+                      00173         ;VARIAVEIS DO IF
+                      00174         
+0022   301D           00175         MOVLW .29                                          ;Caso o ano seja menor que 30, há a possibili
+                            dade de ser uma data fora da especificação
+0023   00B3           00176         MOVWF anoIntervaloFinal
+0024   3015           00177         MOVLW .21                                          ;Caso o ano seja menor que 21, há a possibili
+                            dade de ser uma data fora da especificação
+0025   00B2           00178         MOVWF anoIntervaloInicial
+0026   300C           00179         MOVLW .12                                          ; Caso o mes seja maior que 13, consiste em u
+                            ma data inexiste, ou seja data fora da especificação
+0027   00B5           00180         MOVWF mesLimite                                    ; se for menor que 30 e maior que 21, de fato
+                             é uma data fora da especificação
+0028   301F           00181         MOVLW .31
+0029   00B6           00182         MOVWF diaLimite
+                      00183         
+                      00184         ; Variaveis da multiplicacao
+002A   300A           00185         MOVLW .10
+002B   00B7           00186         MOVWF contaMes
+                      00187 
+                      00188 
+                      00189         
+                      00190 ;TRATAMENTO DE ERROS    
+                      00191 
+002C                  00192 VERIFICAERRO1 ; O código após este Label se diz respeito a verificação de caso o ano esteja no intervalo
+                             entre 21 e 30
+                      00193         
+                      00194         ;VERIFICANDO SE O ANO É MENOR QUE 30
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00195         
+002C   3000           00196         MOVLW .0                                        ; ZERANDO O WORK
+002D   0824           00197         MOVFW AA                                        ; ATRIBUINDO O ANO A VARIAVEL WORK 
+002E   0233           00198         SUBWF anoIntervaloFinal, W                      ; SUBTRAÇÃO DO VALOR EM WORK  MENOS O ANO INTERV
+                            ALO FINAL 30    
+002F   1C03           00199         BTFSS STATUS, C                                 ; SE O BIT C FOR 1 A LINHA ABAIXO SERÁ PULADA, I
+                            NDICANDO QUE O RESULTADO DA SUBTRAÇÃO FOI NEGATIVO, OU SEJA ANO MENOR QUE 30
+                      00200                                                         ; Caso seja 0, o código será desviado para outro
+                             label, continuando o fluxo previsto pelo código
+0030   2837           00201         GOTO VERIFICAERRO2                              ; Ano não faz parte do intervalo, Label Verifica
+                            Erro1 finalizado
+                      00202         
+                      00203                                                         ; SKIP acionado, sabemos que o ano é menor que 3
+                            0
+                      00204                                                         ;Sabendo que o fluxo do código obteve uma interr
+                            upção, sabemos de fato que o ano é menor que 30, porém para o erro ser completo
+                      00205                                                         ; Devemos saber se é maior que 21, logo verei se
+                             ele é menor que 21, pois caso seja estará fora do intervalo
+                      00206                                                         ;VERIFICANDO SE O ANO É MENOR QUE 21
+0031   3000           00207         MOVLW .0                                        ; ZERANDO O WORK
+0032   0824           00208         MOVFW AA                                        ; ATRIBUINDO O ANO A VARIAVEL WORK 
+0033   0232           00209         SUBWF anoIntervaloInicial, W                    ; SUBTRAÇÃO DO VALOR EM WORK  MENOS O ANO, AGORA
+                             SENDO ANO INICIAL DO INTERVALO, 21     
+0034   1C03           00210         BTFSS STATUS, C                                 ;SE O BIT C FOR 1 A LINHA ABAIXO SERÁ PULADA, IN
+                            DICANDO QUE O RESULTADO DA SUBTRAÇÃO FOI NEGATIVO, 
+                      00211                                                         ;OU SEJA ANO MENOR QUE 21, CASO SEJA 0, O ANO ES
+                            TÁ NO INTERVALO 
+0035   28B0           00212         GOTO FORADAESPECIFICAO                          ; Data fora da especificação
+0036   2837           00213         GOTO VERIFICAERRO2                              ;Ano não faz parte do intervalo, Label VerificaE
+                            rro1 finalizado 
+                      00214 
+0037                  00215 VERIFICAERRO2
+                      00216         
+                      00217         ;VERIFICANDO SE O ANO ESTÁ ENTRE 1910 E 2100
+                      00218         
+0037   3000           00219         MOVLW .0                                        ; ZERANDO O WORK
+0038   0824           00220         MOVFW AA                                        ; ATRIBUINDO O ANO A VARIAVEL WORK 
+0039   022D           00221         SUBWF anoLimiteFinal, W                         ; SUBTRAÇÃO DO VALOR EM WORK  MENOS O ANO LIMITE
+                             FINAL 100,     
+003A   1C03           00222         BTFSS STATUS, C                                 ; SE O BIT C FOR 1 A LINHA ABAIXO SERÁ PULADA, I
+                            NDICANDO QUE O RESULTADO DA SUBTRAÇÃO FOI NEGATIVO, OU SEJA ANO MENOR QUE 100
+003B   2842           00223         GOTO VERIFICAERRO3                              ; Caso seja 0, o código será desviado para outro
+                             label, continuando o fluxo previsto pelo código
+                      00224 
+003C   3000           00225         MOVLW .0                                        ; ZERANDO O WORK
+003D   0824           00226         MOVFW AA                                        ; ATRIBUINDO O ANO A VARIAVEL WORK 
+003E   022C           00227         SUBWF anoLimiteInicial, W                       ; SUBTRAÇÃO DO VALOR EM WORK  MENOS O ANO INICIA
+                            L DO INTERVALO, AGORA SENDO ANO INICIAL DO INTERVALO, 05
+003F   1C03           00228         BTFSS STATUS, C                                 ;SE O BIT C FOR 1 A LINHA ABAIXO SERÁ PULADA, IN
+                            DICANDO QUE O RESULTADO DA SUBTRAÇÃO FOI NEGATIVO, 
+                      00229                                                         ;OU SEJA ANO MENOR QUE 10, SENDO UM MES VALIDO, 
+                            LOGO SENDO 0, O ANO PODE ESTÁ FORA DA ESPECIFICAÇÃO
+                      00230 
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00231         
+0040   2842           00232         GOTO VERIFICAERRO3                              ; Ano faz parte do intervalo 2021 a 1930, Fluxo 
+                            do código procede
+0041   28B0           00233         GOTO FORADAESPECIFICAO                          ; Data fora da especificação
+                      00234 
+                      00235         
+                      00236 
+0042                  00237 VERIFICAERRO3
+                      00238         
+                      00239         ;Verificar se o mes é inválido
+                      00240         
+0042   3000           00241         MOVLW .0                                        ; ZERANDO O WORK
+0043   0823           00242         MOVFW MM                                        ; ATRIBUINDO O MÊS A VARIAVEL WORK 
+0044   0235           00243         SUBWF mesLimite, W                              ; SUBTRAÇÃO DO VALOR EM WORK  MENOS O MÊS LIMITE
+                             FINAL 13,      
+0045   1C03           00244         BTFSS STATUS, C                                 ; SE O BIT C FOR 1 A LINHA ABAIXO SERÁ PULADA, I
+                            NDICANDO QUE O RESULTADO DA SUBTRAÇÃO FOI NEGATIVO, OU SEJA MES MENOR QUE 13
+0046   28B0           00245         GOTO  FORADAESPECIFICAO                         ; Label para Data fora da especificação
+0047   2848           00246         GOTO  VERIFICAERRO4
+                      00247         
+                      00248 
+                      00249         
+0048                  00250 VERIFICAERRO4
+                      00251         
+                      00252         ;Verificando se o mês é nulo 
+0048   0823           00253         MOVFW MM
+0049   1903           00254         BTFSC STATUS, Z                                 ; Caso o bit Z seja 0, pulará uma linha do códig
+                            o indicando que a variável MM não é nula, continuando o fluxo previsto pelo código
+                      00255                                                         ; Se bit Z = 1, logo será o dado da variavel mês
+                             é nulo
+004A   28B0           00256         GOTO FORADAESPECIFICAO                          ; Data fora da especificação
+004B   284C           00257         GOTO VERIFICAERRO5
+                      00258         
+                      00259         
+                      00260         
+004C                  00261 VERIFICAERRO5
+                      00262         
+                      00263         ;Verificar se o dia é valido
+004C   3000           00264         MOVLW .0                                        ; ZERANDO O WORK
+004D   0822           00265         MOVFW DD                                        ; ATRIBUINDO O DIA A VARIAVEL WORK 
+004E   0236           00266         SUBWF diaLimite, W                              ; SUBTRAÇÃO DO VALOR EM WORK  MENOS O DIA,COM IN
+                            TUITO DE SABER SE O DIA É MENOR 31      
+004F   1C03           00267         BTFSS STATUS, C                                 ;SE O BIT C FOR 1 A LINHA ABAIXO SERÁ PULADA, IN
+                            DICANDO QUE O RESULTADO DA SUBTRAÇÃO FOI NEGATIVO, 
+0050   28B0           00268         GOTO FORADAESPECIFICAO
+0051   2852           00269         GOTO VERIFICAERRO6                              ;OU SEJA ANO MENOR QUE 32, SENDO UM DIA QUASE VA
+                            LIDO, LOGO C SENDO IGUAL A 0, O ANO ESTÁ FORA DA ESPECIFICAÇÃO
+                      00270         
+                      00271         
+0052                  00272 VERIFICAERRO6
+                      00273         
+                      00274         ;Verificar se o dia não é nulo
+0052   0822           00275         MOVFW DD                                        
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0053   1903           00276         BTFSC STATUS, Z                                 ;Caso o bit Z seja 0, pulará uma linha do código
+                             indicando que a variável DD, dia não é nula, continuando o fluxo previsto pelo código
+                      00277                                                         ; Se bit Z = 1, logo será o dado da variavel mês
+                             é nulo
+0054   28B0           00278         GOTO FORADAESPECIFICAO                          ; Data NULA, fora da especificação
+0055   2856           00279         GOTO DIACERTO1                                  ; Se bit Z = 0, logo será desviado para outro la
+                            bel, continuando o fluxo previsto pelo código
+                      00280 
+                      00281 
+0056                  00282 DIACERTO1
+0056   3000           00283         MOVLW .0                                        ; reiniciando o work
+0057   3018           00284         MOVlW .24                                       ; Atribuindo o dia ao work
+0058   0222           00285         SUBWF DD, W                                     ;verificando se é igual 24, pois o dia faz parte
+                             da tabela
+0059   1903           00286         BTFSC STATUS, Z                                 ;Caso o bit Z seja 0, pulará uma linha do código
+                             indicando que a subtração não resultou em 0
+                      00287                                                         ; Se bit Z = 1, logo o dia é 24, pois 24 - 24 = 
+                            0, não haverá skip de instrução
+                      00288         
+005A   287C           00289         GOTO MESCERTO1                                  ; logo será desviado para outro label para verif
+                            icar o mês
+005B   3000           00290         MOVLW .0                                        ; reiniciando o work
+005C   3015           00291         MOVlW .21                                       ; Atribuindo o dia ao work
+005D   0222           00292         SUBWF DD, W                                     ; verificando se é igual 21, pois o dia faz part
+                            e da tabela
+005E   1903           00293         BTFSC STATUS, Z                                 ; Caso o bit Z seja 0, pulará uma linha do códig
+                            o indicando que a subtração não resultou em 0
+                      00294                                                         ; Se bit Z = 1, logo o dia é 21, pois 21 - 21 = 
+                            0, não haverá skip de instrução
+                      00295                                                         
+                      00296         ;Dia 21 pode ser a data 21/10/21 caso os anos sejam subtraidos e resulte 0 pode ser a data, nece
+                            ssitando so verificar o mês
+                      00297         
+005F   2870           00298         GOTO MESCERTO2                                  ; Label para verificar se é dia 21/10/21
+0060   3000           00299         MOVLW .0                                        ; reiniciando o work
+0061   3015           00300         MOVlW .21                                       ; Atribuindo o dia ao work
+0062   0222           00301         SUBWF DD, W                                     ; verificando se é igual 21, pois o dia faz part
+                            e da tabela
+0063   1903           00302         BTFSC STATUS, Z                                 ; Caso o bit Z seja 0, pulará uma linha do códig
+                            o indicando que a subtração não resultou em 0
+                      00303                                                         ; Se bit Z = 1, logo o dia é 21, pois 21 - 21 = 
+                            0, não haverá skip de instrução
+0064   287C           00304         GOTO MESCERTO1                                  ; logo será desviado para outro label para verif
+                            icar o mes
+                      00305         
+0065   3000           00306         MOVLW .0                                        ; reiniciando o work
+0066   300A           00307         MOVlW .10                                       ; Atribuindo o dia ao work
+0067   0222           00308         SUBWF DD, W                                     ;verificando se é igual 21 novamente, pois outra
+                             data faz parte da tabela
+0068   1903           00309         BTFSC STATUS, Z                                 ;Caso o bit Z seja 0, pulará uma linha do código
+                             indicando que a subtração não resultou em 0
+                      00310         
+0069   287C           00311         GOTO MESCERTO1
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+006A   3000           00312         MOVLW .0                                        
+006B   3002           00313         MOVlW .2                                        
+006C   0222           00314         SUBWF DD, W                                     
+006D   1903           00315         BTFSC STATUS, Z                                 
+                      00316                                                         
+006E   287C           00317         GOTO MESCERTO1                                  
+006F   28B0           00318         GOTO FORADAESPECIFICAO                          ;Caso nenhum dia seja confirmado, a data está fo
+                            ra da especificação
+                      00319 
+                      00320 
+0070                  00321 MESCERTO2
+                      00322         ;Para a data que tem o dia igual ao ano 2021
+0070   3000           00323         MOVLW .0                                        ; reiniciando o work
+0071   3015           00324         MOVlW .21                                       ; Atribuindo o dia ao work
+0072   0224           00325         SUBWF AA, W                                     ; verificando se é igual ao ano 2021, pois o dia
+                             21 já foi verificado em DIACERTO1
+0073   1903           00326         BTFSC STATUS, Z                                 ; Caso o bit Z seja 0, pulará uma linha do códig
+                            o indicando que a subtração não resultou em 0
+0074   2876           00327         GOTO MESCERTO3                                  ; Verificar o mês para confirmar a data
+0075   287C           00328         GOTO MESCERTO1                                  ; Ainda há uma data com o dia 21, logo o mês dev
+                            e ser verificado mesmo que a subtração do dia pelo ano resulte em 0
+                      00329         
+0076                  00330 MESCERTO3
+                      00331         ;Verificando o mês da data que o ano - dia resulta em 0
+0076   3000           00332         MOVLW .0                                        ; reiniciando o work
+0077   300A           00333         MOVlW .10                                       ; Atribuindo o dia ao work
+0078   0223           00334         SUBWF MM, W                                     ;verificando se é igual 21, pois o dia faz parte
+                             da tabela
+0079   1903           00335         BTFSC STATUS, Z                                 ;Caso o bit Z seja 0, pulará uma linha do código
+                             indicando que a subtração não resultou em 0
+                      00336                                                         ; Se bit Z = 1, logo o mês é 10, pois 10 - 10 = 
+                            0
+007A   28A6           00337         GOTO DIADADATA1                                 ; Label para aplicar o valor de W referente ao d
+                            ia da data
+007B   28B0           00338         GOTO FORADAESPECIFICAO                          ; data fora da tabela
+                      00339 
+                      00340         
+007C                  00341 MESCERTO1       
+                      00342         ;Verificação de meses feita da mesma forma, com subtação e teste do bit Z, a diferença que serão
+                             transferidas ou para o label ANOCERTO1
+                      00343         ;ou FORA DA ESPECIFICAÇÃO
+                      00344         
+007C   3000           00345         MOVLW .0                                        
+007D   3002           00346         MOVlW .2                                        
+007E   0223           00347         SUBWF MM, W                                     
+007F   1903           00348         BTFSC STATUS, Z                                 
+                      00349                                                         
+0080   2891           00350         GOTO ANOCERTO1
+0081   3000           00351         MOVLW .0                                        
+0082   3004           00352         MOVlW .4                                        
+0083   0223           00353         SUBWF MM, W                                     
+0084   1903           00354         BTFSC STATUS, Z                                 
+                      00355                                                         
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0085   2891           00356         GOTO ANOCERTO1
+0086   3000           00357         MOVLW .0                                        
+0087   3006           00358         MOVlW .6                                        
+0088   0223           00359         SUBWF MM, W                                     
+0089   1903           00360         BTFSC STATUS, Z                                 
+                      00361                                                         
+008A   2891           00362         GOTO ANOCERTO1
+008B   3000           00363         MOVLW .0                                        
+008C   3008           00364         MOVlW .8                                        
+008D   0223           00365         SUBWF MM, W                                     
+008E   1903           00366         BTFSC STATUS, Z                                 
+                      00367                                                         
+008F   2891           00368         GOTO ANOCERTO1
+0090   28B0           00369         GOTO FORADAESPECIFICAO
+                      00370 
+                      00371 
+0091                  00372 ANOCERTO1
+                      00373         ;Validar o ano também testando o bit Z e direcionando para o Label da data correspondente ou par
+                            a fora da especificação
+                      00374         
+0091   3000           00375         MOVLW .0                                        
+0092   3005           00376         MOVLW .5                                        
+0093   0224           00377         SUBWF AA, W                                     
+0094   1903           00378         BTFSC STATUS, Z                                 
+                      00379                                                                 
+0095   28A8           00380         GOTO DIADADATA2                                 
+0096   3000           00381         MOVLW .0                                        
+0097   3015           00382         MOVLW .21                                       
+0098   0224           00383         SUBWF AA, W                                     
+0099   1903           00384         BTFSC STATUS, Z                                 
+                      00385                                                                 
+009A   28AA           00386         GOTO DIADADATA3                                 
+009B   3000           00387         MOVLW .0                                        
+009C   3037           00388         MOVLW .55                                       
+009D   0224           00389         SUBWF AA, W                                     
+009E   1903           00390         BTFSC STATUS, Z                                 
+                      00391                                                                 
+009F   28AC           00392         GOTO DIADADATA4
+00A0   3000           00393         MOVLW .0                                        
+00A1   3046           00394         MOVLW .70                                       
+00A2   0224           00395         SUBWF AA, W                                     
+00A3   1903           00396         BTFSC STATUS, Z                                 
+                      00397                                                                 
+00A4   28AE           00398         GOTO DIADADATA5
+                      00399         
+00A5   28B0           00400         GOTO FORADAESPECIFICAO                          
+                      00401 
+00A6                  00402 DIADADATA1
+                      00403         
+00A6   3005           00404         MOVLW .5                                        ;21/10/1955, Quinta-feira
+00A7   28B2           00405         GOTO FIM
+                      00406 
+00A8                  00407 DIADADATA2
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00408         
+00A8   3007           00409         MOVLW .7                                        ;02/04/2005, Sabádo
+00A9   28B2           00410         GOTO FIM
+                      00411 
+00AA                  00412 DIADADATA3
+                      00413         
+00AA   3003           00414         MOVLW .3                                        ;10/08/2021, Terça-feira
+00AB   28B2           00415         GOTO FIM
+                      00416 
+00AC                  00417 DIADADATA4
+                      00418         
+00AC   3005           00419         MOVLW .5                                        ;24/02/1955, Quinta-feira
+00AD   28B2           00420         GOTO FIM
+                      00421 
+00AE                  00422 DIADADATA5
+                      00423         
+00AE   3001           00424         MOVLW .1                                        ;21/06/1970, Domingo
+00AF   28B2           00425         GOTO FIM
+                      00426 
+00B0                  00427 FORADAESPECIFICAO
+                      00428         
+                      00429         ;Caso os meses, dias e anos que não passarem nos testes de verificação virão para cá
+                      00430         
+00B0   3000           00431         MOVLW .0                                        ; Data fora da especificação
+00B1   28B2           00432         GOTO FIM                                        ; Programa finalizado
+                      00433 
+                      00434 
+00B2                  00435 FIM
+00B2   28B2           00436         GOTO FIM
+                      00437 
+                      00438 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00439 ;*                       FIM DO PROGRAMA                           *
+                      00440 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00441 
+                      00442         END
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+AA                                00000024
+ADCON0                            0000001F
+ADCS0                             00000004
+ADCS1                             00000005
+ADCS2                             00000006
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANOCERTO1                         00000091
+ANS0                              00000000
+ANS1                              00000001
+ANS2                              00000002
+ANS3                              00000003
+ANSEL                             0000009F
+BANK0                             BCF STATUS,RP0
+BANK1                             BSF STATUS,RP0
+C                                 00000000
+CAL0                              00000002
+CAL1                              00000003
+CAL2                              00000004
+CAL3                              00000005
+CAL4                              00000006
+CAL5                              00000007
+CHS0                              00000002
+CHS1                              00000003
+CINV                              00000004
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             00000019
+CMIE                              00000003
+CMIF                              00000003
+COUT                              00000006
+DC                                00000001
+DD                                00000022
+DIACERTO1                         00000056
+DIADADATA1                        000000A6
+DIADADATA2                        000000A8
+DIADADATA3                        000000AA
+DIADADATA4                        000000AC
+DIADADATA5                        000000AE
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDAT                             0000009A
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+FIM                               000000B2
+FORADAESPECIFICAO                 000000B0
+FSR                               00000004
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GP4                               00000004
+GP5                               00000005
+GPIE                              00000003
+GPIF                              00000000
+GPIO                              00000005
+GPIO0                             00000000
+GPIO1                             00000001
+GPIO2                             00000002
+GPIO3                             00000003
+GPIO4                             00000004
+GPIO5                             00000005
+INDF                              00000000
+INICIO                            0000000D
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IOC                               00000096
+IOC0                              00000000
+IOC1                              00000001
+IOC2                              00000002
+IOC3                              00000003
+IOC4                              00000004
+IOC5                              00000005
+IOCB                              00000096
+IOCB0                             00000000
+IOCB1                             00000001
+IOCB2                             00000002
+IOCB3                             00000003
+IOCB4                             00000004
+IOCB5                             00000005
+IRP                               00000007
+MAIN                              00000018
+MESCERTO1                         0000007C
+MESCERTO2                         00000070
+MESCERTO3                         00000076
+MM                                00000023
+NOT_BOD                           00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_GPPU                          00000007
+NOT_PD                            00000003
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+NOT_POR                           00000001
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OPTION_REG                        00000081
+OSCCAL                            00000090
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PIE1                              0000008C
+PIR1                              0000000C
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+SAI_INT                           00000007
+STATUS                            00000003
+STATUS_TEMP                       00000021
+SUBROTINA1                        0000000C
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1IE                              00000000
+T1IF                              00000000
+T1OSCEN                           00000003
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TRISIO                            00000085
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+TRISIO4                           00000004
+TRISIO5                           00000005
+VCFG                              00000006
+VERIFICAERRO1                     0000002C
+VERIFICAERRO2                     00000037
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+VERIFICAERRO3                     00000042
+VERIFICAERRO4                     00000048
+VERIFICAERRO5                     0000004C
+VERIFICAERRO6                     00000052
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000099
+VREN                              00000007
+VRR                               00000005
+W                                 00000000
+WPU                               00000095
+WPU0                              00000000
+WPU1                              00000001
+WPU2                              00000002
+WPU4                              00000004
+WPU5                              00000005
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+W_TEMP                            00000020
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00003F7F
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FOSC_EC                          00003FFB
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRCCLK                    00003FFD
+_FOSC_INTRCIO                     00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_MCLRE_OFF                        00003FDF
+MPASM 5.77                          MAIN.ASM   8-31-2021  17:40:26         PAGE 15
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FF9
+__12F675                          00000001
+__DEBUG                           
+__MPLAB_DEBUGGER_SIMULATOR        1
+anoIntervaloFinal                 00000033
+anoIntervaloInicial               00000032
+anoLimiteFinal                    0000002D
+anoLimiteInicial                  0000002C
+contaMes                          00000037
+contador                          0000002F
+diaLimite                         00000036
+divisao                           00000030
+formulaBissextoX                  00000025
+formulaBissextoY                  00000026
+formulaBissextoZ                  00000027
+k                                 0000002E
+mesIntervaloFinal                 00000034
+mesLimite                         00000035
+produto                           00000031
+w                                 0000002B
+x                                 00000028
+y                                 00000029
+z                                 0000002A
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : X---XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXX-------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   176
+Program Memory Words Free:   848
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     3 reported,     0 suppressed
+
+
