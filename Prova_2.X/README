@@ -1,0 +1,2 @@
+#PROVA 2
+A segunda prova teve com intuito colocar em prática o conteúdo trabalho na disciplina, contendo apenas uma questão, a minha foi para desenvolver um algoritmo para um carro se manter movimentando em uma faixa presente no chão, o carro tinha dois motores e dois sensores que tinha uma tabela verdade a ser respeitada, também havia um limite de temperatura para os motores que as vezes era necessário resfriá-lo, mantendo ele desligado por um certo tempo.
