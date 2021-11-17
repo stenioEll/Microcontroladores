@@ -1,0 +1,3 @@
+#Controle de temperatura 
+
+O objetivo da atividade é utilizar um compressor para fazer um controle da temperatura no dispositivo, utilizei o registrador CMCON que permite fazer a comparação, o primeiro passo foi converter a temperatura para sinais analógicos para poder fazer a comparação, após isso o CMCON com a configuração certa entrega uma saída binário se aquela temperatura é maior ou menor que a de referência, a partir desse bit de saída era possível diminuir a temperatura se estivesse acima ou aumentar se estivesse abaixo, como o compressor faz em regrigeradores.
