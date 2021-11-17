@@ -1,0 +1,68 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Wed Nov 17 11:41:34 2021
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_1       code   0x000004    program   0x0000a0
+.config_2007_BUILD/DEFAULT/DEBUG/TRAB3.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000053      
+                            0x002007    0x002007      
+            84 out of 1158 program addresses used, program memory utilization is 7%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  AGUARDA   0x000010    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                ALGORITMO   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                 CONTADOR   0x00000d    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     ERRO   0x000041    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                      FIM   0x000054    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                    Hz10k   0x00001e    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                    Hz20k   0x000027    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                    Hz30k   0x000030    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     Hz5k   0x000015    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                   INICIO   0x000043    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     LED0   0x000039    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     LED1   0x00003b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     LED4   0x00003d    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     LED5   0x00003f    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     MAIN   0x000050    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                  SAI_INT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     ZERA   0x000053    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  SAI_INT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                ALGORITMO   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                 CONTADOR   0x00000d    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                  AGUARDA   0x000010    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     Hz5k   0x000015    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                    Hz10k   0x00001e    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                    Hz20k   0x000027    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                    Hz30k   0x000030    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     LED0   0x000039    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     LED1   0x00003b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     LED4   0x00003d    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     LED5   0x00003f    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     ERRO   0x000041    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                   INICIO   0x000043    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     MAIN   0x000050    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                     ZERA   0x000053    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+                      FIM   0x000054    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE3.X\Trab3.ASM
+
+
