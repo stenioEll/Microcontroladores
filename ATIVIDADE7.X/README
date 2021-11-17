@@ -1,0 +1,5 @@
+#ORDENAÇÃO
+
+Criar algotimo para ordenar valores hexadecimais presentes na memória com o uso dos registrador EEPROM para escrever e gravar os valores na memória, implemementei o algoritmo Insertion sort, que da esquerda para a direita
+vai trocando de posições os números menores que o pivô, logo na atividade eu acessava a primeira posição da memória e armazenava o valor que estava contido lá em uma variável, após isso o pivô se desloca para a posição
+n+1 para fazer o mesmo processo só que salva em outra variável, com uma subtração simples o bit C do STATUS me indica se o elemento da direita é menor que o da esquerda, se for, trocam de posição na memória.
