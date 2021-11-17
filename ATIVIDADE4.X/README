@@ -1,0 +1,3 @@
+#Pisca Alerta
+
+Criar um algoritmo que fizesse a função de um pisca-alerta utilizando interrupções, essa atividade foi complexa por usar interrupções caso o alerta fosse para a direita o código gerava uma interrupção, ligava o led correspondente e retornava ao fluxo normal do programa, a atividade demandava 3 tipos de pisca, um para o direita, outro para esquerda, e ambos ligados, como se tem em um carro real.
