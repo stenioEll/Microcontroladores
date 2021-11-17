@@ -1,0 +1,5 @@
+#Conversor A/D 
+
+Nessa atividade o objetivo era controlar a intensidade de um Led, tendo que criar um algoritmo que recebesse um sinal analógico e convertesse em digital para poder calcular a frequência que diz respeito ao sinal de entrada
+Os registradores utilizados para essa atividade foram o TRISIO que permite escolher as entradas e saídas do código, o ADCON que faz a conversão A/D e também tem o bit que especifica se a conversão acabou,
+o ANSEL para escolher o canal analógico referente ao sinal de entrada, Option_reg para escolha de escala do clock interno.
