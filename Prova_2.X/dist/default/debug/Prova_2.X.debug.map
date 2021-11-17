@@ -1,0 +1,60 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Thu Oct 21 17:58:48 2021
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_1       code   0x000004    program   0x00007a
+.config_2007_BUILD/DEFAULT/DEBUG/PROVA_2.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000040      
+                            0x002007    0x002007      
+            65 out of 1158 program addresses used, program memory utilization is 5%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    CONTA   0x000035    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                    DELAY   0x000032    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+            DESLIGAMOTOR1   0x000021    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+            DESLIGAMOTOR2   0x000028    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+              DESLIGATUDO   0x00002f    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                      FIM   0x000041    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                   INICIO   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                   LABEL1   0x00001e    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                   LABEL2   0x000025    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                   LABEL3   0x00002c    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+               LIGAMOTOR1   0x000023    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+               LIGAMOTOR2   0x00002a    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                  SAI_INT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  SAI_INT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                   INICIO   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                   LABEL1   0x00001e    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+            DESLIGAMOTOR1   0x000021    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+               LIGAMOTOR1   0x000023    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                   LABEL2   0x000025    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+            DESLIGAMOTOR2   0x000028    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+               LIGAMOTOR2   0x00002a    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                   LABEL3   0x00002c    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+              DESLIGATUDO   0x00002f    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                    DELAY   0x000032    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                    CONTA   0x000035    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+                      FIM   0x000041    program     static C:\Users\steni\Documents\Nova Pasta (3)\Prova_2.X\prova_2.ASM
+
+
