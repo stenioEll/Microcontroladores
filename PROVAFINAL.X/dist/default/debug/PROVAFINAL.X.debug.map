@@ -1,0 +1,58 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Tue Dec 14 18:03:04 2021
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_1       code   0x000004    program   0x000084
+.config_2007_BUILD/DEFAULT/DEBUG/FINAL.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000045      
+                            0x002007    0x002007      
+            70 out of 1158 program addresses used, program memory utilization is 6%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+         AGUARDAINSTRUCAO   0x000044    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                CONFIGURA   0x000024    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+           CONTADESLIGADO   0x00001c    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+              CONTALIGADO   0x000013    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+              DESLIGA50US   0x000016    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                    DORME   0x000041    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                      FIM   0x000046    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                   INICIO   0x00002e    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                 LIGA50US   0x00000d    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                 LIMPAWDT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                PISCALED0   0x000008    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                  SAI_INT   0x000029    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                 LIMPAWDT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                PISCALED0   0x000008    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                 LIGA50US   0x00000d    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+              CONTALIGADO   0x000013    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+              DESLIGA50US   0x000016    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+           CONTADESLIGADO   0x00001c    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                CONFIGURA   0x000024    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                  SAI_INT   0x000029    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                   INICIO   0x00002e    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                    DORME   0x000041    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+         AGUARDAINSTRUCAO   0x000044    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+                      FIM   0x000046    program     static C:\Users\steni\Documents\Nova Pasta (3)\PROVAFINAL.X\Final.ASM
+
+

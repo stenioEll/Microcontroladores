@@ -1,0 +1,84 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Thu Dec 02 12:37:48 2021
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_1       code   0x000004    program   0x00015c
+.config_2007_BUILD/DEFAULT/DEBUG/MEDIDORPIC16       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x0000b1      
+                            0x002007    0x002007      
+            178 out of 2182 program addresses used, program memory utilization is 8%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                       C1   0x000024    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C2   0x000034    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C3   0x000040    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C4   0x00004f    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C5   0x00005e    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C6   0x00006c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C7   0x00007b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C8   0x00008b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C9   0x000098    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                    CONTA   0x000010    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY0   0x00002b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY1   0x00003b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY2   0x000047    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY3   0x000056    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY4   0x000065    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY5   0x000073    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY6   0x000082    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY7   0x000092    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY8   0x00009f    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY9   0x0000a9    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                   INICIA   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                   INICIO   0x000014    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                     MAIN   0x000024    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                  SAI_INT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+               SUBROTINA1   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  SAI_INT   0x000007    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+               SUBROTINA1   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                   INICIA   0x00000c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                    CONTA   0x000010    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                   INICIO   0x000014    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                     MAIN   0x000024    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C1   0x000024    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY0   0x00002b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C2   0x000034    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY1   0x00003b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C3   0x000040    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY2   0x000047    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C4   0x00004f    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY3   0x000056    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C5   0x00005e    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY4   0x000065    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C6   0x00006c    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY5   0x000073    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C7   0x00007b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY6   0x000082    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C8   0x00008b    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY7   0x000092    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                       C9   0x000098    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY8   0x00009f    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+                 DISPLAY9   0x0000a9    program     static C:\Users\steni\Documents\Nova Pasta (3)\ATIVIDADE10.X\MEDIDORPIC16F628A.ASM
+
+

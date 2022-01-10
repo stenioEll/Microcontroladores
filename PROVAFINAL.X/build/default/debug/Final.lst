@@ -1,0 +1,566 @@
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00002 ;*              MODIFICAÇÕES PARA USO COM 12F675                   *
+                      00003 ;*                FEITAS PELO PROF. MARDSON                        *
+                      00004 ;*                      MARÇO DE 2021                              *
+                      00005 ;*                 BASEADO NO EXEMPLO DO LIVRO                     *
+                      00006 ;*           Desbravando o PIC. David José de Souza                *
+                      00007 ;*-----------------------------------------------------------------*
+                      00008 ;*   MODELO PARA O PIC 12F675                                      *
+                      00009 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00010 
+                      00011 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00012 ;*                     ARQUIVOS DE DEFINIÇÕES                      *
+                      00013 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00014 #INCLUDE <p12f675.inc>  ;ARQUIVO PADRÃO MICROCHIP PARA 12F675
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Nov 22 2017
+                      00005 ;  MPASM PIC12F675 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00367         LIST
+                      00015 
+2007   3F8C           00016         __CONFIG _BODEN_OFF & _CP_OFF & _PWRTE_ON & _WDT_ON & _MCLRE_OFF & _INTRC_OSC_NOCLKOUT   ; MCLRE
+                             OFF PARA MANTER TODOS OS LEDS APAGADOS INCLUSIVE O GP3
+                      00017 
+                      00018 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00019 ;*                    PAGINAÇÃO DE MEMÓRIA                         *
+                      00020 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00021 ;DEFINIÇÃO DE COMANDOS DE USUÁRIO PARA ALTERAÇÃO DA PÁGINA DE MEMÓRIA
+                      00022 #DEFINE BANK0   BCF STATUS,RP0  ;SETA BANK 0 DE MEMÓRIA
+                      00023 #DEFINE BANK1   BSF STATUS,RP0  ;SETA BANK 1 DE MAMÓRIA
+                      00024 
+                      00025 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00026 ;*                         VARIÁVEIS                               *
+                      00027 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00028 ; DEFINIÇÃO DOS NOMES E ENDEREÇOS DE TODAS AS VARIÁVEIS UTILIZADAS 
+                      00029 ; PELO SISTEMA
+                      00030 
+                      00031         CBLOCK  0x20    ;ENDEREÇO INICIAL DA MEMÓRIA DE
+                      00032                                         ;USUÁRIO
+  00000020            00033                 W_TEMP            ;REGISTRADORES TEMPORÁRIOS PARA USO
+  00000021            00034                 STATUS_TEMP       ;JUNTO ÀS INTERRUPÇÕE
+  00000022            00035                 CONTADOR
+                      00036                 
+                      00037         
+                      00038         
+                      00039                 ;COLOQUE AQUI SUAS NOVAS VARIÁVEIS
+                      00040                 ;NÃO ESQUEÇA COMENTÁRIOS ESCLARECEDORES
+                      00041 
+                      00042         ENDC                    ;FIM DO BLOCO DE DEFINIÇÃO DE VARIÁVEIS
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00043 
+                      00044 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00045 ;*                        FLAGS INTERNOS                           *
+                      00046 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00047 ; DEFINIÇÃO DE TODOS OS FLAGS UTILIZADOS PELO SISTEMA
+                      00048 
+                      00049 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00050 ;*                         CONSTANTES                              *
+                      00051 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00052 ; DEFINIÇÃO DE TODAS AS CONSTANTES UTILIZADAS PELO SISTEMA
+                      00053 
+                      00054 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00055 ;*                           ENTRADAS                              *
+                      00056 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00057 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO ENTRADA
+                      00058 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00059 
+                      00060 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00061 ;*                           SAÍDAS                                *
+                      00062 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00063 ; DEFINIÇÃO DE TODOS OS PINOS QUE SERÃO UTILIZADOS COMO SAÍDA
+                      00064 ; RECOMENDAMOS TAMBÉM COMENTAR O SIGNIFICADO DE SEUS ESTADOS (0 E 1)
+                      00065 
+                      00066 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00067 ;*                       VETOR DE RESET                            *
+                      00068 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00069 
+                      00070         ORG     0x00                    ;ENDEREÇO INICIAL DE PROCESSAMENTO
+0000   2???           00071         GOTO    INICIO
+                      00072         
+                      00073         
+                      00074 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00075 ;*                    INÍCIO DA INTERRUPÇÃO                        *
+                      00076 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00077 ; ENDEREÇO DE DESVIO DAS INTERRUPÇÕES. A PRIMEIRA TAREFA É SALVAR OS
+                      00078 ; VALORES DE "W" E "STATUS" PARA RECUPERAÇÃO FUTURA
+                      00079 
+                      00080         ORG     0x04                    ;ENDEREÇO INICIAL DA INTERRUPÇÃO
+0004   00A0           00081         MOVWF   W_TEMP          ;COPIA W PARA W_TEMP
+0005   0E03           00082         SWAPF   STATUS,W
+0006   00A1           00083         MOVWF   STATUS_TEMP     ;COPIA STATUS PARA STATUS_TEMP
+                      00084         
+                      00085 
+                      00086 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00087 ;*                    ROTINA DE INTERRUPÇÃO                        *
+                      00088 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00089 ; AQUI SERÃO ESCRITAS AS ROTINAS DE RECONHECIMENTO E TRATAMENTO DAS
+                      00090 ; INTERRUPÇÕES
+                      00091         ; VERIFICANDO A POSIÇÃO DA INTERRUPÇAÕ
+0007                  00092 LIMPAWDT
+0007   0064           00093         CLRWDT               ; LIMPANDO WDT
+0008                  00094 PISCALED0                   ;LABEL DE CONTROLE DO PISCA DO LED REFERENTE AO GP0, O QUAL DEVE PISCAR 4 VE
+                            ZES E SE MANTER LIGADO POR 50 MS E DEPOIS DESLIGADO POR 50 MS
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0008   1683           00095         BANK1
+0009   3000           00096         MOVLW   B'00000000'     ;CONFIGUREI O GP1 COMO saida para poder desligar todos os leds
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000A   0085           00097         MOVWF   TRISIO          ;COMO SAÍDAS
+                      00098         ;MOVLW  B'00000111'     ; AJUSTEI O PRE-ESCALE PARA 1:256 E DESLIGUEI O BIT 3 INDICANDO QUE USAR
+                            EI O TMR0
+                      00099         ;MOVWF  OPTION_REG      ;DEFINE OPÇÕES DE OPERAÇÃO
+000B   1283           00100         BANK0
+000C   0185           00101         CLRF GPIO               ;desligando todos os leds
+000D                  00102 LIGA50US
+000D   1405           00103         BSF GPIO, GP0             ;LIGANDO LED
+000E   30AF           00104         MOVLW B'10101111'       ; MOVENDO OS PRIMEIROS 8 BITS DO RESULTADO DA SUBTRAÇÃO DO MAXIMO TO TMR
+                            1 - 50MS
+000F   008E           00105         MOVWF TMR1L
+0010   303C           00106         MOVLW B'00111100'       ; MOVENDO OS ULTIMOS 8 BITS DO RESULTADO DA SUBTRAÇÃO DO MAXIMO TO TMR1 
+                            - 50MS
+0011   008F           00107         MOVWF TMR1H
+                      00108         
+                      00109         ;CLRF TMR0              ;ZERANDO O TMR0
+                      00110         ;MOVLW .61              ; inicializando com o valor gerado da diferença de 256 - 195 = 61 para p
+                            rovocar o estouro com 50us
+                      00111         ;MOVWF TMR0
+0012   2???           00112         GOTO CONTALIGADO
+0013                  00113 CONTALIGADO
+0013   1C0C           00114         BTFSS PIR1, TMR1IF      ; estourou? Sim! CONTA DESLIGADO
+0014   2???           00115         GOTO CONTALIGADO
+0015   2???           00116         GOTO DESLIGA50US
+0016                  00117 DESLIGA50US
+0016   1005           00118         BCF GPIO, GP0             ;DESLIGANDO LED
+0017   30AF           00119         MOVLW B'10101111'       ; MOVENDO OS PRIMEIROS 8 BITS DO RESULTADO DA SUBTRAÇÃO DO MAXIMO TO TMR
+                            1 - 50MS
+0018   008E           00120         MOVWF TMR1L
+0019   303C           00121         MOVLW B'00111100'       ; MOVENDO OS ULTIMOS 8 BITS DO RESULTADO DA SUBTRAÇÃO DO MAXIMO TO TMR1 
+                            - 50MS
+001A   008F           00122         MOVWF TMR1H
+001B   2???           00123         GOTO CONTADESLIGADO
+001C                  00124 CONTADESLIGADO
+001C   1C0C           00125         BTFSS PIR1, TMR1IF      ; estourou? Sim! vai incrementar a variavel
+001D   2???           00126         GOTO CONTADESLIGADO
+Message[305]: Using default destination of 1 (file).
+001E   0AA2           00127         INCF CONTADOR           ;PISCOU, incrementa a variável para controlar a contagem
+001F   3004           00128         MOVLW .4                ; VERIFICANDO SE CONTOU 4 VEZES 50Us A TAREFA ACABOU
+0020   0222           00129         SUBWF CONTADOR, W
+0021   1803           00130         BTFSC STATUS, C         ; SE TIVER CONTADO 50K 2000 VEZES, TEREMOS 10M us e
+0022   2???           00131         GOTO CONFIGURA
+0023   2???           00132         GOTO DESLIGA50US
+0024                  00133 CONFIGURA                      ;VOLTANDO AS CONFIGURAÇÕES ANTERIORES E SAINDO DA INTERRUPÇÃO
+0024   1683           00134         BANK1
+0025   3002           00135         MOVLW   B'00000010'     ;CONFIGUREI O GP1 COMO ENTRADA para poder gerar a interrupção,  e os dem
+                            ais saida, sabendo que gp0 corresponde ao led que deve ser aceso POIS FOI DEMANDADO PELA ATIVIDA
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0026   0085           00136         MOVWF   TRISIO          ;COMO SAÍDAS
+                      00137         ;MOVLW  B'00001101'     ; AJUSTEI O PRE-ESCALE PARA 1:32 E SETEI O BIT 3 INDICANDO QUE É REFEREN
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                            TE AO WATCHDOG
+                      00138         ;MOVWF  OPTION_REG      ;DEFINE OPÇÕES DE OPERAÇÃO
+0027   1283           00139         BANK0
+0028   100B           00140         BCF INTCON, GPIF
+                      00141         
+                      00142         
+                      00143 
+                      00144 
+                      00145 
+                      00146         
+                      00147         
+                      00148 
+                      00149 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00150 ;*                 ROTINA DE SAÍDA DA INTERRUPÇÃO                  *
+                      00151 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00152 ; OS VALORES DE "W" E "STATUS" DEVEM SER RECUPERADOS ANTES DE 
+                      00153 ; RETORNAR DA INTERRUPÇÃO
+                      00154 
+0029                  00155 SAI_INT
+0029   0E21           00156         SWAPF   STATUS_TEMP,W
+002A   0083           00157         MOVWF   STATUS          ;MOVE STATUS_TEMP PARA STATUS
+002B   0EA0           00158         SWAPF   W_TEMP,F
+002C   0E20           00159         SWAPF   W_TEMP,W        ;MOVE W_TEMP PARA W
+002D   0009           00160         RETFIE
+                      00161         
+                      00162 
+                      00163 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00164 ;*                       ROTINAS E SUBROTINAS                      *
+                      00165 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00166 ; CADA ROTINA OU SUBROTINA DEVE POSSUIR A DESCRIÇÃO DE FUNCIONAMENTO
+                      00167 ; E UM NOME COERENTE ÀS SUAS FUNÇÕES.
+                      00168 
+                      00169 
+                      00170 
+                      00171         ;CORPO DA ROTINA
+                      00172 
+                      00173 
+                      00174  
+                      00175 
+                      00176 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00177 ;*                     INICIO DO PROGRAMA                          *
+                      00178 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00179         
+002E                  00180 INICIO
+002E   1683           00181         BANK1                   ;ALTERA PARA O BANCO 1
+002F   3002           00182         MOVLW   B'00000010'     ;CONFIGUREI O GP1 COMO ENTRADA para poder gerar a interrupção,  e os dem
+                            ais saida, sabendo que gp0 corresponde ao led que deve ser aceso POIS FOI DEMANDADO PELA ATIVIDA
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0030   0085           00183         MOVWF   TRISIO          ;
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0031   019F           00184         CLRF ANSEL
+0032   300D           00185         MOVLW   B'00001101'     ; AJUSTEI O PRE-ESCALE PARA 1:32 E SETEI O BIT 3 INDICANDO QUE É REFEREN
+                            TE AO WATCHDOG
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0033   0081           00186         MOVWF   OPTION_REG      ;DEFINE OPÇÕES DE OPERAÇÃO
+0034   3088           00187         MOVLW   B'10001000'     ;ATIVANDO INTERRUPÇÃO POR PORTA 
+0035   008B           00188         MOVWF   INTCON          ;DEFINE OPÇÕES DE INTERRUPÇÕES
+0036   3002           00189         MOVLW   B'00000010'     ;INTERRUPÇÃO PELA A MUDANÇA DE PORTA DO GP1 ATIVADA
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0037   0096           00190         MOVWF   IOC             ;DEFINE OPÇÕES DE INTERRUPÇÕES
+0038   3000           00191         MOVLW   B'00000000'     ;NÃO UTILIZAREI
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0039   0099           00192         MOVWF   VRCON
+003A   1283           00193         BANK0                           ;RETORNA PARA O BANCO
+003B   3001           00194         MOVLW   B'00000001'     ;USANDO PRESCALE 1:1 PARA CONTAR 50 MS E HABILITEI O 
+003C   0090           00195         MOVWF   T1CON 
+003D   3000           00196         MOVLW   B'00000000'     ;DESLIGANDO O REGISTRADOR DE CONVERSAO
+003E   009F           00197         MOVWF   ADCON0 
+003F   3007           00198         MOVLW   B'00000111'     ; DESLIGANDO O CMCON REGISTRADOR DE COMPARAÇÃO
+0040   0099           00199         MOVWF   CMCON           ;DEFINE O MODO DE OPERAÇÃO DO COMPARADOR ANALÓGICO
+                      00200 
+                      00201 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00202 ;*                     INICIALIZAÇÃO DAS VARIÁVEIS                 *
+                      00203 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00204 
+                      00205 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00206 ;*                     ROTINA PRINCIPAL                            *
+                      00207 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+0041                  00208 DORME   ;Label que fará o microcontrolador dormir
+0041   0185           00209         CLRF GPIO
+0042   0063           00210         SLEEP               ; O MICRO ACORDARÁ QUANDO WDT ESTOURAR, COM O PRE-SCALE DE 32, PRÓXIMO A 550
+                             MS, RESPEITANDO A MARGEM DE ERRO
+0043   0000           00211         NOP
+0044                  00212 AGUARDAINSTRUCAO            ;logo para executar qualquer tarefa enquanto o micro esta acordado, mude o g
+                            p1 de estado
+0044   2???           00213         GOTO AGUARDAINSTRUCAO
+0045   2???           00214         GOTO DORME
+                      00215         
+                      00216         
+                      00217         
+                      00218 
+                      00219 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00220 ;*                     CONSUMO DE ENERGIA                          *
+                      00221 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00222 ;MODO SLEEP
+                      00223         
+                      00224 ;A CORRENTE DO WATCHDOG PARA TENSÃO DE 5V É DE 17UA, ELE SERÁ UTILIZADO POR 2,2SEGUNDOS, APÓS ISSO É LIM
+                            PO
+                      00225 ;Convertendo 2,2 segundos para horas temos 0,000611111 que é aproximadamente 611 uH
+                      00226 ;Multiplicando pelo valor da corrente de WDT teremos 17UA * 611Uh = 0,010378uH
+                      00227 ;O consumo do watchdog é de 0,010378uWh
+                      00228 
+                      00229 ;MODO ACORDADO
+                      00230 ; A CORRENTE PARA ACENDER UM LED É DE 1UA para 5V no pior caso o programa roda em 60us
+                      00231 ; Transformando 60us em horas temos 0,016667 uH 
+                      00232 ; Multiplicando pela a corrente teremos  0,016667uWh pois a corrente é 1uA, esse é o consumo no pior cas
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                            o
+                      00233 
+                      00234 ; ECONOMIA
+                      00235 ; Enquanto o microcontrolador dorme o consumo de energia por 2,2 segundos é equivalente a 0,010378 uWh l
+                            ogo 
+                      00236 ; Fazendo o consumo quando o microcontrolador está ligado - está desligado teremos =  0,016667uWh - 0,01
+                            0378 uWh
+                      00237 ; Portanto economiza-se 0,006289uWh, pois com o sleep o funcionamento do gpio estará desligado 
+                      00238 
+                      00239 
+0046                  00240 FIM
+                      00241         
+                      00242 
+                      00243 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00244 ;*                       FIM DO PROGRAMA                           *
+                      00245 ;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+                      00246 
+3F8C                  00247         END
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADCON0                            0000001F
+ADCS0                             00000004
+ADCS1                             00000005
+ADCS2                             00000006
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+AGUARDAINSTRUCAO                  00000044
+ANS0                              00000000
+ANS1                              00000001
+ANS2                              00000002
+ANS3                              00000003
+ANSEL                             0000009F
+BANK0                             BCF STATUS,RP0
+BANK1                             BSF STATUS,RP0
+C                                 00000000
+CAL0                              00000002
+CAL1                              00000003
+CAL2                              00000004
+CAL3                              00000005
+CAL4                              00000006
+CAL5                              00000007
+CHS0                              00000002
+CHS1                              00000003
+CINV                              00000004
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             00000019
+CMIE                              00000003
+CMIF                              00000003
+CONFIGURA                         00000024
+CONTADESLIGADO                    0000001C
+CONTADOR                          00000022
+CONTALIGADO                       00000013
+COUT                              00000006
+DC                                00000001
+DESLIGA50US                       00000016
+DORME                             00000041
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDAT                             0000009A
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+FIM                               00000046
+FSR                               00000004
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GP4                               00000004
+GP5                               00000005
+GPIE                              00000003
+GPIF                              00000000
+GPIO                              00000005
+GPIO0                             00000000
+GPIO1                             00000001
+GPIO2                             00000002
+GPIO3                             00000003
+GPIO4                             00000004
+GPIO5                             00000005
+INDF                              00000000
+INICIO                            0000002E
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IOC                               00000096
+IOC0                              00000000
+IOC1                              00000001
+IOC2                              00000002
+IOC3                              00000003
+IOC4                              00000004
+IOC5                              00000005
+IOCB                              00000096
+IOCB0                             00000000
+IOCB1                             00000001
+IOCB2                             00000002
+IOCB3                             00000003
+IOCB4                             00000004
+IOCB5                             00000005
+IRP                               00000007
+LIGA50US                          0000000D
+LIMPAWDT                          00000007
+NOT_BOD                           00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_GPPU                          00000007
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OPTION_REG                        00000081
+OSCCAL                            00000090
+PCL                               00000002
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PIE1                              0000008C
+PIR1                              0000000C
+PISCALED0                         00000008
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+SAI_INT                           00000029
+STATUS                            00000003
+STATUS_TEMP                       00000021
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1IE                              00000000
+T1IF                              00000000
+T1OSCEN                           00000003
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TRISIO                            00000085
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+TRISIO4                           00000004
+TRISIO5                           00000005
+VCFG                              00000006
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000099
+VREN                              00000007
+VRR                               00000005
+W                                 00000000
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+WPU                               00000095
+WPU0                              00000000
+WPU1                              00000001
+WPU2                              00000002
+WPU4                              00000004
+WPU5                              00000005
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+W_TEMP                            00000020
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00003F7F
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FOSC_EC                          00003FFB
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRCCLK                    00003FFD
+_FOSC_INTRCIO                     00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FF9
+__12F675                          00000001
+__DEBUG                           
+__MPLAB_DEBUGGER_SIMULATOR        1
+
+MPASM 5.77                         FINAL.ASM   12-14-2021  18:03:03         PAGE 11
+
+
+
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     8 reported,     0 suppressed
+
+
